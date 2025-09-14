@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Publications</title>
+  <link rel="stylesheet" href="css/PublicationsPage.css" />
+  <link rel="stylesheet" href="css/HomePage.css" /> <!-- Ensures you retain all site-wide styles -->
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="container centered-header">
+      <img src="images/logo/Logo3.png" alt="SocWrites Logo" class="logo" />
+      <h1>SocWrites Journal</h1>
+      <hr class="header-separator" />
+      <nav>
+        <ul>
+          <li><a href="index3.html">Home</a></li>
+          <li><a href="Publications.html" class="active">Publications</a></li>
+          <li><a href="submit.html">Submit</a></li>
+          <li><a href="About_Us.html">About Us</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Search Button + Expandable Search Bar -->
+    <div class="search-section">
+      <button id="search-toggle">Search</button>
+      <input type="text" id="search-bar" placeholder="Search articles..." />
+    </div>
+
+    <!--new overlay search  -->
+<!-- Search Overlay (initially hidden) -->
+      <div id="search-overlay" style="display:none;">
+        <div class="search-page-inner">
+          <button id="close-search-overlay" class="close-btn">&times;</button>
+          <h2>Search Articles</h2>
+          <input type="text" id="overlay-search-bar" placeholder="Type to search articles...">
+          <div id="overlay-articles-grid" class="publications-grid"></div>
+          <p id="overlay-no-results" style="display:none; text-align:center; margin-top:2rem; font-size:1.2rem; color:var(--taupe);font-style:italic;">No results found.</p>
+        </div>
+      </div>
+
+
+    <!-- Articles Grid -->
+    <section class="publications-grid" id="publications-grid">
+      <!-- Add all your articles here -->
+      <article class="pub-card">
+        <img src="images/logo/DefaultImage.svg" alt="Article Image" />
+        <h3>Understanding Rural Education Gaps</h3>
+        <p class="meta">By Dr. Meera S. | August 2025</p>
+      </article>
+      <!-- ...continue with at least 13 articles for demo... -->
+       
+      <article class="pub-card">
+        <img src="images/logo/DefaultImage.svg" alt="Article Image" />
+        <h3>Women in Urban Workforce</h3>
+        <p class="meta">By R. Singh | July 2025</p>
+      </article>
+      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 1</h3><p class="meta">By H. Sharma | June 2025</p></article>
+      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 2</h3><p class="meta">By H. Sharma | June 2025</p></article>
+      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 3</h3><p class="meta">By H. Sharma | June 2025</p></article>
+      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 4</h3><p class="meta">By H. Sharma | June 2025</p></article>
+      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 5</h3><p class="meta">By H. Sharma | June 2025</p></article>
+      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 6</h3><p class="meta">By H. Sharma | June 2025</p></article>
+      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 7</h3><p class="meta">By H. Sharma | June 2025</p></article>
+      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 8</h3><p class="meta">By H. Sharma | June 2025</p></article>
+      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 9</h3><p class="meta">By H. Sharma | June 2025</p></article>
+      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 10</h3><p class="meta">By H. Sharma | June 2025</p></article>
+      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 11</h3><p class="meta">By H. Sharma | June 2025</p></article>
+      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 12</h3><p class="meta">By H. Sharma | June 2025</p></article>
+      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 13</h3><p class="meta">By H. Sharma | June 2025</p></article>
+      
+    </section>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-nav">
+      <button id="back-page-btn" style="visibility: hidden;">&larr; Back</button>
+      <button id="next-page-btn" disabled>Next &rarr;</button>
+    </div>
+    <!-- No results message -->
+    <p id="no-results-msg" style="display:none; text-align:center; margin-top: 1rem; font-style: italic; color: var(--taupe);">
+      No results found.
+    </p>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-column">
+        <h3>SocWrites</h3>
+        <p>Where Research Meets Readers.</p>
+        <p>© 2025 SocWrites. All Rights Reserved.</p>
+      </div>
+      <div class="footer-column">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index3.html">Home</a></li>
+          <li><a href="Publications.html">Publications</a></li>
+          <li><a href="submit.html">Submit</a></li>
+          <li><a href="About_Us.html">About Us</a></li>
+          <li><a href="mailto:support@socwrites.org">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-column">
+        <h4>Contact Us</h4>
+        <p>Email: <a href="mailto:editor@socwrites.org">editor@socwrites.org</a></p>
+        <p>Phone: +91 9650XXX101</p>
+        <p>New Delhi, India</p>
+        <div class="social-icons">
+          <a href="https://www.facebook.com"><img src="images/logo/Facebook.svg" alt="Facebook" /></a>
+          <a href="https://www.instagram.com/thesocwrites"><img src="images/logo/Instagram.svg" alt="Instagram" /></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Pagination + Search JS -->
+
+<script>
+const grid = document.getElementById('publications-grid');
+const nextBtn = document.getElementById('next-page-btn');
+const backBtn = document.getElementById('back-page-btn');
+const noResultsMsg = document.getElementById('no-results-msg');
+const articles = Array.from(grid.querySelectorAll('.pub-card'));
+const ARTICLES_PER_PAGE = 12;
+let page = 0;
+let paginatedFiltered = articles;
+
+function renderPage() {
+  paginatedFiltered.forEach((card, i) => {
+    card.style.display = (i >= page * ARTICLES_PER_PAGE && i < (page + 1) * ARTICLES_PER_PAGE) ? 'block' : 'none';
+  });
+
+  noResultsMsg.style.display = paginatedFiltered.length === 0 ? 'block' : 'none';
+  const totalPages = Math.ceil(paginatedFiltered.length / ARTICLES_PER_PAGE);
+
+  backBtn.style.visibility = (page > 0 && paginatedFiltered.length > 0) ? 'visible' : 'hidden';
+  backBtn.disabled = page === 0 || paginatedFiltered.length === 0;
+  nextBtn.style.display = paginatedFiltered.length > ARTICLES_PER_PAGE ? 'inline-block' : 'none';
+  backBtn.style.display = paginatedFiltered.length > ARTICLES_PER_PAGE ? 'inline-block' : 'none';
+  nextBtn.disabled = (page >= totalPages - 1 || paginatedFiltered.length === 0);
+
+  if (paginatedFiltered.length <= ARTICLES_PER_PAGE || paginatedFiltered.length === 0) {
+    nextBtn.style.display = 'none';
+    backBtn.style.display = 'none';
+  }
+}
+
+nextBtn.addEventListener("click", function () {
+  const totalPages = Math.ceil(paginatedFiltered.length / ARTICLES_PER_PAGE);
+  if (page < totalPages - 1) {
+    page++;
+    renderPage();
+    window.scrollTo({ top: grid.offsetTop, behavior: 'smooth' });
+  }
+});
+backBtn.addEventListener("click", function () {
+  if (page > 0) {
+    page--;
+    renderPage();
+    window.scrollTo({ top: grid.offsetTop, behavior: 'smooth' });
+  }
+});
+renderPage();
+
+const searchToggleBtn = document.getElementById("search-toggle");
+const overlay = document.getElementById('search-overlay');
+const overlayCloseBtn = document.getElementById('close-search-overlay');
+const overlaySearchInput = document.getElementById('overlay-search-bar');
+const overlayArticlesGrid = document.getElementById('overlay-articles-grid');
+const overlayNoResults = document.getElementById('overlay-no-results');
+
+const allArticles = Array.from(document.querySelectorAll('.pub-card'));
+
+searchToggleBtn.addEventListener('click', function() {
+  overlay.style.display = 'block';
+  showOverlayArticles('');
+  overlaySearchInput.value = '';
+  overlaySearchInput.focus();
+});
+overlayCloseBtn.addEventListener('click', function(){
+  overlay.style.display = 'none';
+});
+function cloneArticleCard(card) {
+  return card.cloneNode(true);
+}
+function showOverlayArticles(query) {
+  overlayArticlesGrid.innerHTML = '';
+  let filtered;
+  if (!query) {
+    filtered = allArticles;
+  } else {
+    filtered = allArticles.filter(card =>
+      card.querySelector("h3").innerText.toLowerCase().includes(query.toLowerCase())
+    );
+  }
+  if (filtered.length === 0) {
+    overlayArticlesGrid.style.display = "none";
+    overlayNoResults.style.display = "block";
+  } else {
+    overlayArticlesGrid.style.display = "grid";
+    overlayNoResults.style.display = "none";
+    filtered.forEach(card => overlayArticlesGrid.appendChild(cloneArticleCard(card)));
+  }
+}
+overlaySearchInput.addEventListener('input', function() {
+  showOverlayArticles(this.value);
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === "Escape" && overlay.style.display === "block")
+    overlay.style.display = 'none';
+});
+</script>
+
+</body>
+</html>

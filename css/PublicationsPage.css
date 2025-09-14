@@ -1,0 +1,152 @@
+:root {
+  --bg: #fdf5e6;
+  --white: #fff;
+  --text: #2a2a2a;
+  --gold: #d4af37;
+  --gold-hover: #e1c275;
+  --taupe: #bca97e;
+  --border: #ddd2c0;
+  --pearl: #f8f4ee;
+}
+
+/* Only these rules below are new/modified for grid/search/pagination, all others from your main CSS will still apply! */
+
+.search-section {
+  margin: 20px 0;
+  text-align: center;
+}
+#search-toggle {
+  background-color: var(--gold);
+  border: none;
+  padding: 8px 16px;
+  color: var(--white);
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background 0.3s;
+}
+#search-toggle:hover {
+  background-color: var(--gold-hover);
+}
+#search-bar {
+  display: none;
+  width: 70%;
+  max-width: 400px;
+  margin-top: 10px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+#search-bar.active {
+  display: inline-block;
+}
+
+/* Grid for articles */
+.publications-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+/*Overlay search css*/
+#search-overlay {
+  position: fixed;
+  z-index: 999;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(250,248,240,0.98); /* subtle overlay */
+  overflow-y: auto;
+  padding: 50px 0;
+}
+.search-page-inner {
+  margin: auto;
+  background: var(--pearl);
+  border-radius: 12px;
+  max-width: 960px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  padding: 32px 24px 24px;
+  position: relative;
+}
+.close-btn {
+  position: absolute;
+  top: 20px; right: 24px;
+  font-size: 2rem;
+  background: none;
+  border: none;
+  color: var(--taupe);
+  cursor: pointer;
+}
+#overlay-search-bar {
+  width: 100%;
+  max-width: 400px;
+  margin: 20px auto 32px;
+  display: block;
+  padding: 12px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  font-size: 1.1rem;
+}
+#overlay-articles-grid {
+  margin-top: 1rem;
+}
+
+.pub-card {
+  background-color: var(--pearl);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.pub-card:hover {
+  transform: translateY(-5px);
+}
+.pub-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+}
+.pub-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  color: var(--gold);
+  margin-bottom: 0.4rem;
+}
+.pub-card .meta {
+  font-size: 0.9rem;
+  color: var(--taupe);
+}
+
+/* Pagination buttons: back left, next right */
+.pagination-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 2rem;
+}
+.pagination-nav button {
+  background-color: var(--gold);
+  color: var(--white);
+  border: none;
+  border-radius: 5px;
+  padding: 10px 28px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.pagination-nav button:disabled {
+  background-color: var(--border);
+  color: #aaa;
+  cursor: not-allowed;
+}
+#no-results-msg {
+  font-size: 1.2rem;
+  margin-top: 2rem;
+  color: var(--taupe);
+  text-align: center;
+  font-style: italic;
+}

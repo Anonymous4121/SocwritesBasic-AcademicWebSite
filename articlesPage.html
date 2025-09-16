@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Article - SocWrites Journal</title>
+  <link rel="stylesheet" href="css/HomePage.css" />
+  <link rel="stylesheet" href="css/PublicationsPage.css" />
+  <style>
+/* ================= HEADER ================= */
+.article-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--pearl);
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  font-family: 'Playfair Display', serif;
+}
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  color: var(--gold);
+  cursor: pointer;
+  font-weight: bold;
+  margin-right: 16px;
+}
+.article-header-title {
+  flex: 1;
+  text-align: center;
+  font-size: 2rem;
+  color: var(--gold);
+  letter-spacing: 1px;
+  font-family: inherit;
+}
+.article-logo {
+  height: 48px;
+  width: auto;
+  margin-left: 16px;
+}
+
+/* ================= SINGLE ARTICLE PAGE ================= */
+.article-main {
+  max-width: 1200px;
+  margin: 2rem auto 0 auto;
+  background: var(--pearl);
+  border-radius: 12px;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.07);
+  padding: 2.2rem 20px 2rem 20px;
+  font-family: 'Merriweather', serif;
+}
+.article-image {
+  display: block;              /* make it behave like a block */
+  margin: 0 auto 1.2rem auto;  /* auto left/right centers it */
+  width: 900px;
+  max-height: 340px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: var(--white);
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+}
+.article-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.1rem;
+  color: var(--gold);
+  margin-bottom: 1.1rem;
+  text-align: center;
+  font-weight: 600;
+}
+.article-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.4rem;
+  font-size: 1rem;
+  color: var(--taupe);
+}
+.article-content {
+  font-size: 1.17rem;
+  color: var(--text);
+  line-height: 1.7;
+  white-space: pre-line;
+}
+.header-separator {
+  width: 80%;
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0.5rem auto;
+}
+/* ================= ARTICLES LIST PAGE ================= */
+.article {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  margin: 20px auto;
+  max-width: 900px;
+  padding: 15px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.article img {
+  width: 180px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.article-content {
+  flex: 1;
+}
+.article-content h3 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+.article-content p {
+  font-size: 0.95rem;
+  color: #555;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 600px) {
+  .article-header-title { font-size: 1.25rem; }
+  .article-title { font-size: 1.3rem; }
+  .article-logo { height: 32px; }
+
+  .article {
+    flex-direction: column;
+    text-align: center;
+  }
+  .article img {
+    width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="article-header">
+    <button class="back-btn" onclick="window.history.back()" title="Go Back">&larr;</button>
+    <div class="article-header-title">SocWrites Journal</div>
+    <img src="images/logo/Logo3.png" alt="SocWrites Logo" class="article-logo" />
+  </header>
+
+  <!-- MAIN ARTICLE CONTENT -->
+  <main>
+    <div class="article-main">
+      <img id="article-image" src="images/logo/DefaultImage.svg" alt="Article Image" class="article-image"/>
+      <div class="article-title" id="article-title"></div>
+      <div class="article-meta">
+        <span id="article-date">Date</span>
+        <span id="article-author">By Author</span>
+      </div>
+      <hr class="header-separator" />
+      <div class="article-content" id="article-content"></div>
+    </div>
+  </main>
+
+  <!-- FOOTER (same as all pages) -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-column">
+        <h3>SocWrites</h3>
+        <p>Where Research Meets Readers.</p>
+        <p>© 2025 SocWrites. All Rights Reserved.</p>
+      </div>
+      <div class="footer-column">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index3.html">Home</a></li>
+          <li><a href="Publications.html">Publications</a></li>
+          <li><a href="submit.html">Submit</a></li>
+          <li><a href="About_Us.html">About Us</a></li>
+          <li><a href="mailto:support@socwrites.org">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-column">
+        <h4>Contact Us</h4>
+        <p>Email: <a href="mailto:editor@socwrites.org">editor@socwrites.org</a></p>
+        <p>Phone: +91 9650XXX101</p>
+        <p>New Delhi, India</p>
+        <div class="social-icons">
+          <a href="https://www.facebook.com"><img src="images/logo/Facebook.svg" alt="Facebook" /></a>
+          <a href="https://www.instagram.com/thesocwrites"><img src="images/logo/Instagram.svg" alt="Instagram" /></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Article Data Demo Script (static version, you can switch to CMS fetch later) -->
+  <script>
+    // Demo: Static example. When using CMS, replace this part with API fetch
+    // You can expand this structure for more articles
+    const sampleArticles = [
+      {
+        id: "1",
+        image: "images/logo/DefaultImage.svg",
+        title: "Understanding Rural Education Gaps",
+        date: "August 2025",
+        author: "Dr. Meera S.",
+        content: "This is the full article content about rural education gaps..."
+      },
+      {
+        id: "2",
+        image: "",
+        title: "Women in Urban Workforce",
+        date: "July 2025",
+        author: "R. Singh",
+        content: "Insights and research on women participation in the urban workforce..."
+      }
+    ];
+
+    // Get article ID from URL
+    function getParam(name){
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
+
+    const articleId = getParam('id') || "1";
+    const article = sampleArticles.find(a => a.id === articleId);
+
+    document.getElementById('article-image').src = article && article.image ? article.image : "images/logo/DefaultImage.svg";
+    document.getElementById('article-title').textContent = article ? article.title : "Article not found";
+    document.getElementById('article-date').textContent = article ? article.date : "";
+    document.getElementById('article-author').textContent = article ? "By " + article.author : "";
+    document.getElementById('article-content').textContent = article ? article.content : "Sorry, this article could not be found.";
+
+    // Fallback for empty image path
+    document.getElementById('article-image').onerror = function() {
+      this.src = "images/logo/DefaultImage.svg";
+    };
+  </script>
+</body>
+</html>

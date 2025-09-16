@@ -49,7 +49,7 @@
     <!-- Articles Grid -->
     <section class="publications-grid" id="publications-grid">
       <!-- Add all your articles here -->
-      <article class="pub-card">
+      <article class="pub-card" data-id="1">
         <img src="images/logo/DefaultImage.svg" alt="Article Image" />
         <h3>Understanding Rural Education Gaps</h3>
         <p class="meta">By Dr. Meera S. | August 2025</p>
@@ -176,7 +176,21 @@ const overlayArticlesGrid = document.getElementById('overlay-articles-grid');
 const overlayNoResults = document.getElementById('overlay-no-results');
 
 const allArticles = Array.from(document.querySelectorAll('.pub-card'));
+// Navigation helper function to route to article page by id
+function goToArticle(articleId) {
+  window.location.href = 'articlesPage.html?id=' + articleId;
+}
 
+// Make main article cards clickable for navigation
+articles.forEach(card => {
+  card.style.cursor = 'pointer';
+  card.addEventListener('click', () => {
+    const id = card.getAttribute('data-id');
+    if (id) {
+      goToArticle(id);
+    }
+  });
+});
 searchToggleBtn.addEventListener('click', function() {
   overlay.style.display = 'block';
   showOverlayArticles('');
@@ -187,7 +201,16 @@ overlayCloseBtn.addEventListener('click', function(){
   overlay.style.display = 'none';
 });
 function cloneArticleCard(card) {
-  return card.cloneNode(true);
+  const cloned = card.cloneNode(true);
+  const id = card.getAttribute('data-id');
+  cloned.setAttribute('data-id', id);
+  cloned.style.cursor = 'pointer';
+  cloned.addEventListener('click', () => {
+    if (id) {
+      goToArticle(id);
+    }
+  });
+  return cloned;
 }
 function showOverlayArticles(query) {
   overlayArticlesGrid.innerHTML = '';
@@ -208,6 +231,7 @@ function showOverlayArticles(query) {
     filtered.forEach(card => overlayArticlesGrid.appendChild(cloneArticleCard(card)));
   }
 }
+
 overlaySearchInput.addEventListener('input', function() {
   showOverlayArticles(this.value);
 });

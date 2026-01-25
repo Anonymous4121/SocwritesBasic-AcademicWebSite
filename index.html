@@ -4,13 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SocWrites Journal</title>
-  <link rel="stylesheet" href="css/HomePage.css" />
+  <link rel="stylesheet" href="./css/HomePage.css" />
 </head>
 
 <body>
   <header>
     <div class="container centered-header">
-
       <!-- Left Scroll -->
       <div class="scroll left-scroll">
         <div class="scroll-paper">
@@ -18,19 +17,21 @@
         </div>
       </div>
 
+      <!-- FIXED LOGO PATH -->
       <img src="./images/logo/Logo3.png" alt="SocWrites Logo" class="logo" />
       <h1>SocWrites Journal</h1>
       <p class="tagline">Where Research Meets Readers</p>
       <hr class="header-separator" />
       <nav>
         <ul>
-          <li><a href="index3.html">Home</a></li>
-          <li><a href="Publications.html">Publications</a></li>
-          <li><a href="submit.html">Submit</a></li>
-          <li><a href="About_Us.html">About Us</a></li>
+          <li><a href="./index.html">Home</a></li>
+          <li><a href="./Publications.html">Publications</a></li>
+          <li><a href="./submit.html">Submit</a></li>
+          <li><a href="./About_Us.html">About Us</a></li>
         </ul>
       </nav>
-        <!-- Right Scroll -->
+      
+      <!-- Right Scroll -->
       <div class="scroll right-scroll">
         <div class="scroll-paper">
           <p> Every page you read and every note you write brings you closer to knowledge, growth, and discovery.</p>
@@ -40,128 +41,149 @@
   </header>
 
   <main class="container">
-  <section class="featured-article" id="featured-article">
-    <h2>📘 Featured Research</h2>
-    <!-- JS will inject featured article here -->
-  </section>
+    <section class="featured-article" id="featured-article">
+      <h2>📘 Featured Research</h2>
+      <!-- JS will inject featured article here -->
+    </section>
 
-  <section class="article-list" id="recent-articles">
-    <h2>📰 Recent Publications</h2>
-    <!-- JS will inject recent articles here -->
-  </section>
-</main>
+    <section class="article-list" id="recent-articles">
+      <h2>📰 Recent Publications</h2>
+      <!-- JS will inject recent articles here -->
+    </section>
+  </main>
 
-<script>
-const API_BASE = "https://glowing-star-d89f1652ea.strapiapp.com";
+  <!-- FIXED FOOTER SOCIAL ICONS -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-column">
+        <h3>SocWrites</h3>
+        <p>Where Research Meets Readers.</p>
+        <p>© 2025 SocWrites. All Rights Reserved.</p>
+      </div>
 
-async function loadArticles() {
-  try {
-    const res = await fetch(`${API_BASE}/api/articles?populate=*`);
-    const json = await res.json();
-    const articles = Array.isArray(json.data) ? json.data : [];
+      <div class="footer-column">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="./index.html">Home</a></li>
+          <li><a href="./Publications.html">Publications</a></li>
+          <li><a href="./submit.html">Submit</a></li>
+          <li><a href="./About_Us.html">About Us</a></li>
+          <li><a href="mailto:support@socwrites.org">FAQ</a></li>
+        </ul>
+      </div>
 
-    const featuredSection = document.getElementById("featured-article");
-    const recentSection = document.getElementById("recent-articles");
+      <div class="footer-column">
+        <h4>Contact Us</h4>
+        <p>Email: <a href="mailto:editor@socwrites.org">editor@socwrites.org</a></p>
+        <p>Phone: +91 9650XXX101</p>
+        <p>New Delhi, India</p>
 
-    featuredSection.innerHTML = "<h2>📘 Featured Research</h2>";
-    recentSection.innerHTML = "<h2>📰 Recent Publications</h2>";
-
-    if (articles.length === 0) {
-      featuredSection.innerHTML += "<p>No articles found.</p>";
-      return;
-    }
-
-    // Sort by PublishDate (newest first)
-    articles.sort((a, b) => new Date(b.PublishDate) - new Date(a.PublishDate));
-
-    // Helper to extract text from Rich Text (JournalContent)
-    const extractRichText = (richTextArray) => {
-      if (!richTextArray || !Array.isArray(richTextArray)) return "No content available.";
-      return richTextArray
-        .map(block => block.children?.map(child => child.text || "").join(" ") || "")
-        .join(" ")
-        .slice(0, 150) + "...";
-    };
-
-    // Image helper
-    const getImageUrl = (article) => {
-      if (article.ArticleImage && article.ArticleImage.data && article.ArticleImage.data.attributes?.url) {
-        return API_BASE + article.ArticleImage.data.attributes.url;
-      }
-      return "images/logo/DefaultImage.svg";
-    };
-
-    // FEATURED
-    const feat = articles[0];
-    const img = getImageUrl(feat);
-
-    featuredSection.innerHTML += `
-      <article>
-        <img src="${img}" style="width:100%;max-height:240px;object-fit:cover;border-radius:10px;margin-bottom:10px;">
-        <h3>${feat.Title}</h3>
-        <p class="meta">By ${feat.Author} | ${feat.PublishDate}</p>
-        <p>${extractRichText(feat.JournalContent)}</p>
-        <a class="read-more" href="articlesPage.html?id=${feat.id}">Read more →</a>
-      </article>
-    `;
-
-    // RECENT (next 3)
-    const recent = articles.slice(1, 4);
-    if (recent.length === 0) {
-      recentSection.innerHTML += "<p>No recent articles available.</p>";
-    } else {
-      recent.forEach((item) => {
-        recentSection.innerHTML += `
-          <article>
-            <h4><a href="articlesPage.html?id=${item.id}">${item.Title}</a></h4>
-            <p class="meta">By ${item.Author} | ${item.PublishDate}</p>
-          </article>
-        `;
-      });
-    }
-  } catch (err) {
-    console.error("Error loading articles:", err);
-    document.getElementById("featured-article").innerHTML +=
-      `<p style="color:red">Unable to fetch articles: ${err.message}</p>`;
-  }
-}
-
-loadArticles();
-</script>
-
-<!--Footer-->
- <footer class="site-footer">
-  <div class="footer-container">
-    <div class="footer-column">
-      <h3>SocWrites</h3>
-      <p>Where Research Meets Readers.</p>
-      <p>© 2025 SocWrites. All Rights Reserved.</p>
-    </div>
-
-    <div class="footer-column">
-      <h4>Quick Links</h4>
-      <ul>
-        <li><a href="index3.html">Home</a></li>
-        <li><a href="Publications.html">Publications</a></li>
-        <li><a href="submit.html">Submit</a></li>
-        <li><a href="About_Us.html">About Us</a></li>
-        <li><a href="mailto:support@socwrites.org">FAQ</a></li>
-      </ul>
-    </div>
-
-    <div class="footer-column">
-      <h4>Contact Us</h4>
-      <p>Email: <a href="mailto:editor@socwrites.org">editor@socwrites.org</a></p>
-      <p>Phone: +91 9650XXX101</p>
-      <p>New Delhi, India</p>
-
-      <div class="social-icons">
-        <a href="https://www.facebook.com"><img src="./images/logo/Facebook.svg" alt="Facebook" /></a>
-        <a href="https://www.instagram.com/thesocwrites?igsh=MjI5czdtcHlpaW5r"><img src="./images/logo/Instagram.svg" alt="Instagram" /></a>
+        <div class="social-icons">
+          <!-- FIXED SOCIAL ICON PATHS -->
+          <a href="https://www.facebook.com"><img src="./images/logo/Facebook.svg" alt="Facebook" /></a>
+          <a href="https://www.instagram.com/thesocwrites?igsh=MjI5czdtcHlpaW5r"><img src="./images/logo/Instagram.svg" alt="Instagram" /></a>
+        </div>
       </div>
     </div>
-  </div>
-</footer>
+  </footer>
 
+  <script>
+    // PRODUCTION STRAPI URL
+    const API_BASE = "https://glowing-star-d89f1652ea.strapiapp.com";
+
+    async function loadArticles() {
+      try {
+        const res = await fetch(`${API_BASE}/api/articles?populate=*`);
+        const json = await res.json();
+        const articles = Array.isArray(json.data) ? json.data : [];
+
+        const featuredSection = document.getElementById("featured-article");
+        const recentSection = document.getElementById("recent-articles");
+
+        featuredSection.innerHTML = "<h2>📘 Featured Research</h2>";
+        recentSection.innerHTML = "<h2>📰 Recent Publications</h2>";
+
+        if (articles.length === 0) {
+          featuredSection.innerHTML += "<p>No articles found. Please add articles in Strapi admin.</p>";
+          return;
+        }
+
+        // Sort by PublishDate (newest first)
+        articles.sort((a, b) => new Date(b.attributes?.PublishDate || b.PublishDate) - new Date(a.attributes?.PublishDate || a.PublishDate));
+
+        // Helper to extract text from Rich Text (JournalContent)
+        const extractRichText = (richTextArray) => {
+          if (!richTextArray || !Array.isArray(richTextArray)) return "No content available.";
+          
+          // Handle both Strapi v4 (direct array) and v5 (attributes nested)
+          const content = richTextArray.children?.length ? richTextArray.children : richTextArray;
+          
+          return content
+            ?.map(block => block.children?.map(child => child.text || "").join(" ") || "")
+            .join(" ")
+            .slice(0, 150) + "..." || "No content available.";
+        };
+
+        // FIXED Image helper for GitHub Pages + Strapi
+        const getImageUrl = (article) => {
+          let imgData = null;
+          
+          // Strapi v4/v5 compatible
+          if (article.ArticleImage?.data?.attributes?.url) {
+            imgData = article.ArticleImage.data.attributes;
+          } else if (article.attributes?.ArticleImage?.data?.attributes?.url) {
+            imgData = article.attributes.ArticleImage.data.attributes;
+          }
+          
+          if (imgData?.url) {
+            // Ensure full Strapi URL
+            return API_BASE + imgData.url;
+          }
+          return "./images/logo/DefaultImage.svg"; // FIXED LOCAL FALLBACK
+        };
+
+        // FEATURED ARTICLE (first one)
+        const feat = articles[0];
+        const featAttrs = feat.attributes || feat; // Handle both formats
+        const img = getImageUrl(feat);
+
+        featuredSection.innerHTML += `
+          <article>
+            <img src="${img}" 
+                 style="width:100%;max-height:240px;object-fit:cover;border-radius:10px;margin-bottom:10px;"
+                 onerror="this.src='./images/logo/DefaultImage.svg';"
+                 alt="Featured article image">
+            <h3>${featAttrs.Title || featAttrs.title || 'Untitled'}</h3>
+            <p class="meta">By ${featAttrs.Author || featAttrs.author || 'Unknown Author'} | ${featAttrs.PublishDate || featAttrs.publishDate || 'No date'}</p>
+            <p>${extractRichText(featAttrs.JournalContent || featAttrs.content)}</p>
+            <a class="read-more" href="./articlesPage.html?id=${feat.id}">Read more →</a>
+          </article>
+        `;
+
+        // RECENT ARTICLES (next 3)
+        const recent = articles.slice(1, 4);
+        if (recent.length === 0) {
+          recentSection.innerHTML += "<p>No recent articles available.</p>";
+        } else {
+          recent.forEach((item) => {
+            const itemAttrs = item.attributes || item;
+            recentSection.innerHTML += `
+              <article>
+                <h4><a href="./articlesPage.html?id=${item.id}">${itemAttrs.Title || itemAttrs.title}</a></h4>
+                <p class="meta">By ${itemAttrs.Author || itemAttrs.author} | ${itemAttrs.PublishDate || itemAttrs.publishDate}</p>
+              </article>
+            `;
+          });
+        }
+      } catch (err) {
+        console.error("Error loading articles:", err);
+        document.getElementById("featured-article").innerHTML += 
+          `<p style="color:red">Unable to fetch articles: ${err.message}. Check Strapi permissions.</p>`;
+      }
+    }
+
+    // Load articles when page loads
+    loadArticles();
+  </script>
 </body>
 </html>

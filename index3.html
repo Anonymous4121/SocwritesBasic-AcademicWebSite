@@ -129,53 +129,6 @@ async function loadArticles() {
 loadArticles();
 </script>
 
-  
-
-
-<!-- <script>
-const API_BASE = 'http://localhost:1337';
-
-// Fetch all articles
-fetch(`${API_BASE}/api/articles?populate=*&sort=publishDate:desc`)
-  .then(res => res.json())
-  .then(data => {
-    const articles = data.data || [];
-
-    // Featured article: show the first (most recent) one
-    if (articles.length > 0) {
-      const feat = articles[0];
-      const a = feat.attributes;
-      const img = a.image && a.image.data ? API_BASE + a.image.data.attributes.url : 'images/logo/DefaultImage.svg';
-      document.getElementById('featured-article').innerHTML += `
-        <article>
-          <img src="${img}" style="max-width:100%;max-height:240px;object-fit:cover;">
-          <h3>${a.title}</h3>
-          <p class="meta">By ${a.author} | ${a.publishDate || ''}</p>
-          <p>${a.content ? a.content.substring(0,150) + '...' : ''}</p>
-          <a class="read-more" href="articlesPage.html?id=${feat.id}">Read more →</a>
-        </article>
-      `;
-    }
-
-    // Recent articles: next 2 after featured
-    let recHTML = '';
-    for (let i = 1; i < Math.min(articles.length, 3); i++) {
-      const art = articles[i].attributes;
-      recHTML += `
-        <article>
-          <h4><a href="articlesPage.html?id=${articles[i].id}">${art.title}</a></h4>
-          <p class="meta">By ${art.author} | ${art.publishDate || ''}</p>
-        </article>
-      `;
-    }
-    document.getElementById('recent-articles').innerHTML += recHTML;
-  })
-  .catch(() => {
-    document.getElementById('featured-article').innerHTML += `<p style="color:red">Unable to load articles.</p>`;
-    document.getElementById('recent-articles').innerHTML += `<p style="color:red">Unable to load articles.</p>`;
-  });
-</script> -->
-
 <!--Footer-->
  <footer class="site-footer">
   <div class="footer-container">

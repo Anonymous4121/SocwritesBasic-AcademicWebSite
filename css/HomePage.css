@@ -357,3 +357,34 @@ footer {
     gap: 0.5rem;
   }
 }
+/* Prevent horizontal scroll globally
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+} */
+
+/* Hide scrolls ONLY on mobile */
+@media (max-width: 768px) {
+  .scroll {
+    display: none !important;
+  }
+  
+  /* Reposition header content safely */
+  .left-scroll {
+    left: auto !important;
+  }
+  .right-scroll {
+    right: auto !important;
+  }
+  
+  /* Extra safety for small screens */
+  .centered-header {
+    position: relative;
+  }
+}
+
+/* Ensure images don't overflow */
+article img, .logo, .social-icons img {
+  max-width: 100%;
+  height: auto;
+}

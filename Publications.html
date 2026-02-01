@@ -5,10 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Publications</title>
   <link rel="stylesheet" href="css/PublicationsPage.css" />
-  <link rel="stylesheet" href="css/HomePage.css" /> <!-- Ensures you retain all site-wide styles -->
+  <link rel="stylesheet" href="css/HomePage.css" />
+  <style>
+    .loading { text-align: center; color: var(--taupe); font-style: italic; }
+    .error-msg { color: #d32f2f; background: #ffebee; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
+  </style>
 </head>
 <body>
-
   <!-- Header -->
   <header>
     <div class="container centered-header">
@@ -33,48 +36,20 @@
       <input type="text" id="search-bar" placeholder="Search articles..." />
     </div>
 
-    <!--new overlay search  -->
-<!-- Search Overlay (initially hidden) -->
-      <div id="search-overlay" style="display:none;">
-        <div class="search-page-inner">
-          <button id="close-search-overlay" class="close-btn">&times;</button>
-          <h2>Search Articles</h2>
-          <input type="text" id="overlay-search-bar" placeholder="Type to search articles...">
-          <div id="overlay-articles-grid" class="publications-grid"></div>
-          <p id="overlay-no-results" style="display:none; text-align:center; margin-top:2rem; font-size:1.2rem; color:var(--taupe);font-style:italic;">No results found.</p>
-        </div>
+    <!-- Search Overlay (initially hidden) -->
+    <div id="search-overlay" style="display:none;">
+      <div class="search-page-inner">
+        <button id="close-search-overlay" class="close-btn">&times;</button>
+        <h2>Search Articles</h2>
+        <input type="text" id="overlay-search-bar" placeholder="Type to search articles...">
+        <div id="overlay-articles-grid" class="publications-grid"></div>
+        <p id="overlay-no-results" style="display:none; text-align:center; margin-top:2rem; font-size:1.2rem; color:var(--taupe);font-style:italic;">No results found.</p>
       </div>
-
+    </div>
 
     <!-- Articles Grid -->
     <section class="publications-grid" id="publications-grid">
-      <!-- Add all your articles here -->
-      <article class="pub-card" data-id="1">
-        <img src="./images/logo/DefaultImage.svg" alt="Article Image" />
-        <h3>Understanding Rural Education Gaps</h3>
-        <p class="meta">By Dr. Meera S. | August 2025</p>
-      </article>
-      <!-- ...continue with at least 13 articles for demo... -->
-       
-      <article class="pub-card">
-        <img src="./images/logo/DefaultImage.svg" alt="Article Image" />
-        <h3>Women in Urban Workforce</h3>
-        <p class="meta">By R. Singh | July 2025</p>
-      </article>
-      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 1</h3><p class="meta">By H. Sharma | June 2025</p></article>
-      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 2</h3><p class="meta">By H. Sharma | June 2025</p></article>
-      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 3</h3><p class="meta">By H. Sharma | June 2025</p></article>
-      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 4</h3><p class="meta">By H. Sharma | June 2025</p></article>
-      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 5</h3><p class="meta">By H. Sharma | June 2025</p></article>
-      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 6</h3><p class="meta">By H. Sharma | June 2025</p></article>
-      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 7</h3><p class="meta">By H. Sharma | June 2025</p></article>
-      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 8</h3><p class="meta">By H. Sharma | June 2025</p></article>
-      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 9</h3><p class="meta">By H. Sharma | June 2025</p></article>
-      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 10</h3><p class="meta">By H. Sharma | June 2025</p></article>
-      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 11</h3><p class="meta">By H. Sharma | June 2025</p></article>
-      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 12</h3><p class="meta">By H. Sharma | June 2025</p></article>
-      <article class="pub-card"><img src="" alt="" onerror="this.src='images/logo/DefaultImage.svg';"><h3>Testing Here Only 13</h3><p class="meta">By H. Sharma | June 2025</p></article>
-      
+      <div class="loading">Loading articles from Strapi...</div>
     </section>
 
     <!-- Pagination Controls -->
@@ -82,9 +57,10 @@
       <button id="back-page-btn" style="visibility: hidden;">&larr; Back</button>
       <button id="next-page-btn" disabled>Next &rarr;</button>
     </div>
+    
     <!-- No results message -->
     <p id="no-results-msg" style="display:none; text-align:center; margin-top: 1rem; font-style: italic; color: var(--taupe);">
-      No results found.
+      No articles found.
     </p>
   </main>
 
@@ -119,127 +95,199 @@
     </div>
   </footer>
 
-  <!-- Pagination + Search JS -->
+  <script>
+    const API_BASE = "https://glowing-star-d89f1652ea.strapiapp.com";
+    const grid = document.getElementById('publications-grid');
+    const nextBtn = document.getElementById('next-page-btn');
+    const backBtn = document.getElementById('back-page-btn');
+    const noResultsMsg = document.getElementById('no-results-msg');
+    const ARTICLES_PER_PAGE = 12;
+    let allArticles = [];
+    let page = 0;
+    let paginatedFiltered = [];
 
-<script>
-const grid = document.getElementById('publications-grid');
-const nextBtn = document.getElementById('next-page-btn');
-const backBtn = document.getElementById('back-page-btn');
-const noResultsMsg = document.getElementById('no-results-msg');
-const articles = Array.from(grid.querySelectorAll('.pub-card'));
-const ARTICLES_PER_PAGE = 12;
-let page = 0;
-let paginatedFiltered = articles;
-
-function renderPage() {
-  paginatedFiltered.forEach((card, i) => {
-    card.style.display = (i >= page * ARTICLES_PER_PAGE && i < (page + 1) * ARTICLES_PER_PAGE) ? 'block' : 'none';
-  });
-
-  noResultsMsg.style.display = paginatedFiltered.length === 0 ? 'block' : 'none';
-  const totalPages = Math.ceil(paginatedFiltered.length / ARTICLES_PER_PAGE);
-
-  backBtn.style.visibility = (page > 0 && paginatedFiltered.length > 0) ? 'visible' : 'hidden';
-  backBtn.disabled = page === 0 || paginatedFiltered.length === 0;
-  nextBtn.style.display = paginatedFiltered.length > ARTICLES_PER_PAGE ? 'inline-block' : 'none';
-  backBtn.style.display = paginatedFiltered.length > ARTICLES_PER_PAGE ? 'inline-block' : 'none';
-  nextBtn.disabled = (page >= totalPages - 1 || paginatedFiltered.length === 0);
-
-  if (paginatedFiltered.length <= ARTICLES_PER_PAGE || paginatedFiltered.length === 0) {
-    nextBtn.style.display = 'none';
-    backBtn.style.display = 'none';
-  }
-}
-
-nextBtn.addEventListener("click", function () {
-  const totalPages = Math.ceil(paginatedFiltered.length / ARTICLES_PER_PAGE);
-  if (page < totalPages - 1) {
-    page++;
-    renderPage();
-    window.scrollTo({ top: grid.offsetTop, behavior: 'smooth' });
-  }
-});
-backBtn.addEventListener("click", function () {
-  if (page > 0) {
-    page--;
-    renderPage();
-    window.scrollTo({ top: grid.offsetTop, behavior: 'smooth' });
-  }
-});
-renderPage();
-
-const searchToggleBtn = document.getElementById("search-toggle");
-const overlay = document.getElementById('search-overlay');
-const overlayCloseBtn = document.getElementById('close-search-overlay');
-const overlaySearchInput = document.getElementById('overlay-search-bar');
-const overlayArticlesGrid = document.getElementById('overlay-articles-grid');
-const overlayNoResults = document.getElementById('overlay-no-results');
-
-const allArticles = Array.from(document.querySelectorAll('.pub-card'));
-// Navigation helper function to route to article page by id
-function goToArticle(articleId) {
-  window.location.href = 'articlesPage.html?id=' + articleId;
-}
-
-// Make main article cards clickable for navigation
-articles.forEach(card => {
-  card.style.cursor = 'pointer';
-  card.addEventListener('click', () => {
-    const id = card.getAttribute('data-id');
-    if (id) {
-      goToArticle(id);
+    // Navigation helper - uses article.id (matches articlesPage.html)
+    function goToArticle(articleId) {
+      window.location.href = `./articlesPage.html?id=${articleId}`;
     }
-  });
-});
-searchToggleBtn.addEventListener('click', function() {
-  overlay.style.display = 'block';
-  showOverlayArticles('');
-  overlaySearchInput.value = '';
-  overlaySearchInput.focus();
-});
-overlayCloseBtn.addEventListener('click', function(){
-  overlay.style.display = 'none';
-});
-function cloneArticleCard(card) {
-  const cloned = card.cloneNode(true);
-  const id = card.getAttribute('data-id');
-  cloned.setAttribute('data-id', id);
-  cloned.style.cursor = 'pointer';
-  cloned.addEventListener('click', () => {
-    if (id) {
-      goToArticle(id);
+
+    // Create article card from Strapi data
+    function createArticleCard(article, index) {
+      const attrs = article.attributes || article;
+      const id = article.id;
+      const title = attrs.Title || attrs.title || 'Untitled';
+      const author = attrs.Author || attrs.author || 'Unknown';
+      const publishDate = attrs.PublishDate || 'No date';
+      const imgUrl = getImageUrl(article);
+
+      const card = document.createElement('article');
+      card.className = 'pub-card';
+      card.setAttribute('data-id', id);
+      card.style.cursor = 'pointer';
+      
+      card.innerHTML = `
+        <img src="${imgUrl}" alt="${title}" onerror="this.src='./images/logo/DefaultImage.svg'" />
+        <h3>${title}</h3>
+        <p class="meta">By ${author} | ${publishDate}</p>
+      `;
+
+      // Make clickable
+      card.addEventListener('click', () => goToArticle(id));
+      return card;
     }
-  });
-  return cloned;
-}
-function showOverlayArticles(query) {
-  overlayArticlesGrid.innerHTML = '';
-  let filtered;
-  if (!query) {
-    filtered = allArticles;
-  } else {
-    filtered = allArticles.filter(card =>
-      card.querySelector("h3").innerText.toLowerCase().includes(query.toLowerCase())
-    );
-  }
-  if (filtered.length === 0) {
-    overlayArticlesGrid.style.display = "none";
-    overlayNoResults.style.display = "block";
-  } else {
-    overlayArticlesGrid.style.display = "grid";
-    overlayNoResults.style.display = "none";
-    filtered.forEach(card => overlayArticlesGrid.appendChild(cloneArticleCard(card)));
-  }
-}
 
-overlaySearchInput.addEventListener('input', function() {
-  showOverlayArticles(this.value);
-});
-document.addEventListener('keydown', function(e){
-  if(e.key === "Escape" && overlay.style.display === "block")
-    overlay.style.display = 'none';
-});
-</script>
+    // Get Strapi image URL
+    function getImageUrl(article) {
+      try {
+        if (article.ArticleImage?.data?.attributes?.url) {
+          return API_BASE + article.ArticleImage.data.attributes.url;
+        }
+        if (article.attributes?.ArticleImage?.data?.attributes?.url) {
+          return API_BASE + article.attributes.ArticleImage.data.attributes.url;
+        }
+      } catch (e) {}
+      return "./images/logo/DefaultImage.svg";
+    }
 
+    // Load all articles from Strapi
+    async function loadArticles() {
+      try {
+        grid.innerHTML = '<div class="loading">🔄 Fetching articles from Strapi...</div>';
+        
+        const response = await fetch(`${API_BASE}/api/articles?populate=*`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const json = await response.json();
+        allArticles = json.data || [];
+        
+        console.log('📚 Loaded', allArticles.length, 'articles');
+        
+        if (allArticles.length === 0) {
+          grid.innerHTML = '<div class="loading">No articles found in Strapi.</div>';
+          return;
+        }
+
+        // Render initial page
+        paginatedFiltered = allArticles;
+        renderPage();
+        
+      } catch (error) {
+        console.error('Strapi error:', error);
+        grid.innerHTML = `
+          <div class="error-msg">
+            ❌ Failed to load articles: ${error.message}<br>
+            <small>Check Strapi permissions: Public → Articles → find</small>
+          </div>
+        `;
+      }
+    }
+
+    // Pagination
+    function renderPage() {
+      grid.innerHTML = '';
+      
+      const start = page * ARTICLES_PER_PAGE;
+      const end = start + ARTICLES_PER_PAGE;
+      const pageArticles = paginatedFiltered.slice(start, end);
+
+      if (pageArticles.length === 0) {
+        noResultsMsg.style.display = 'block';
+        nextBtn.style.display = 'none';
+        backBtn.style.display = 'none';
+        return;
+      }
+
+      noResultsMsg.style.display = 'none';
+      
+      pageArticles.forEach(article => {
+        const card = createArticleCard(article);
+        grid.appendChild(card);
+      });
+
+      const totalPages = Math.ceil(paginatedFiltered.length / ARTICLES_PER_PAGE);
+      backBtn.style.visibility = page > 0 ? 'visible' : 'hidden';
+      nextBtn.disabled = page >= totalPages - 1;
+      
+      if (totalPages <= 1) {
+        nextBtn.style.display = 'none';
+        backBtn.style.display = 'none';
+      } else {
+        nextBtn.style.display = 'inline-block';
+        backBtn.style.display = 'inline-block';
+      }
+    }
+
+    // Search functionality
+    const searchToggleBtn = document.getElementById("search-toggle");
+    const overlay = document.getElementById('search-overlay');
+    const overlayCloseBtn = document.getElementById('close-search-overlay');
+    const overlaySearchInput = document.getElementById('overlay-search-bar');
+    const overlayArticlesGrid = document.getElementById('overlay-articles-grid');
+    const overlayNoResults = document.getElementById('overlay-no-results');
+
+    function showOverlayArticles(query) {
+      overlayArticlesGrid.innerHTML = '';
+      
+      const filtered = allArticles.filter(article => {
+        const attrs = article.attributes || article;
+        const title = (attrs.Title || attrs.title || '').toLowerCase();
+        const author = (attrs.Author || attrs.author || '').toLowerCase();
+        return title.includes(query.toLowerCase()) || author.includes(query.toLowerCase());
+      });
+
+      if (filtered.length === 0) {
+        overlayArticlesGrid.style.display = "none";
+        overlayNoResults.style.display = "block";
+      } else {
+        overlayArticlesGrid.style.display = "grid";
+        overlayNoResults.style.display = "none";
+        filtered.forEach(article => {
+          const card = createArticleCard(article);
+          overlayArticlesGrid.appendChild(card);
+        });
+      }
+    }
+
+    // Event listeners
+    nextBtn.addEventListener("click", () => {
+      const totalPages = Math.ceil(paginatedFiltered.length / ARTICLES_PER_PAGE);
+      if (page < totalPages - 1) {
+        page++;
+        renderPage();
+        window.scrollTo({ top: grid.offsetTop, behavior: 'smooth' });
+      }
+    });
+
+    backBtn.addEventListener("click", () => {
+      if (page > 0) {
+        page--;
+        renderPage();
+        window.scrollTo({ top: grid.offsetTop, behavior: 'smooth' });
+      }
+    });
+
+    searchToggleBtn.addEventListener('click', () => {
+      overlay.style.display = 'block';
+      overlaySearchInput.focus();
+      showOverlayArticles('');
+    });
+
+    overlayCloseBtn.addEventListener('click', () => {
+      overlay.style.display = 'none';
+    });
+
+    overlaySearchInput.addEventListener('input', (e) => {
+      showOverlayArticles(e.target.value);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === "Escape" && overlay.style.display === "block") {
+        overlay.style.display = 'none';
+      }
+    });
+
+    // Load articles on page load
+    window.addEventListener('load', loadArticles);
+  </script>
 </body>
 </html>

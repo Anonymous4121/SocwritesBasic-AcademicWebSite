@@ -178,10 +178,9 @@
 
   function getImageUrl(article) {
     try {
-      // Try multiple Strapi structures
-      if (article.ArticleImage?.url) return API_BASE + article.ArticleImage.url;
       if (article.ArticleImage?.data?.attributes?.url) return API_BASE + article.ArticleImage.data.attributes.url;
       if (article.attributes?.ArticleImage?.data?.attributes?.url) return API_BASE + article.attributes.ArticleImage.data.attributes.url;
+      if (article.ArticleImage?.url) return API_BASE + article.ArticleImage.url;
     } catch (e) {}
     return "./images/logo/DefaultImage.svg";
   }
@@ -189,77 +188,72 @@
   function extractRichText(content) {
     if (!content) return '<p>No content available.</p>';
     if (typeof content === 'string') return `<p>${content}</p>`;
+    
+    // Handle Strapi rich text array
     if (Array.isArray(content)) {
       return content.map(block => {
-        if (!block.children) return '';
+        if (!block.children?.length) return '';
         const text = block.children.map(child => child.text || '').join('');
-        return block.typeB === 'heading' ? `<h2>${text}</h2>` : `<p>${text}</p>`;
-      }).join('');
+        if (block.typeB === 'heading' || block.type === 'heading') {
+          return `<h${block.level || 2}>${text}</h${block.level || 2}>`;
+        }
+        return `<p>${text}</p>`;
+      }).filter(Boolean).join('');
     }
-    return '<p>Content not recognized.</p>';
+    return '<p>Content unavailable.</p>';
   }
 
   async function loadArticle() {
-    const articleId = getParam('id');
+    const paramId = getParam('id');
+    console.log('🔍 URL ID:', paramId);
     
-    // STEP 1: Debug - Show what ID we're getting
-    console.log('🔍 URL ID:', articleId);
-    document.getElementById('article-title').textContent = `Loading ID: ${articleId || 'NO ID'}`;
+    document.getElementById('article-title').textContent = `Loading article ${paramId}...`;
     
-    if (!articleId) {
-      document.getElementById('article-content').innerHTML = '<p style="color: red;">❌ No article ID in URL. Use: ?id=1</p>';
+    if (!paramId) {
+      document.getElementById('article-content').innerHTML = '<p>No article ID in URL.</p>';
       return;
     }
 
     try {
-      // STEP 2: Test ALL articles first (find your real IDs)
-      console.log('🔍 Testing ALL articles...');
+      // 🚀 STEP 1: Get ALL articles and find matching one
       const allRes = await fetch(`${API_BASE}/api/articles?populate=*`);
       const allJson = await allRes.json();
-      console.log('📋 ALL ARTICLES:', allJson.data);
       
-      // Show first 3 article IDs
-      const ids = allJson.data?.map(a => a.id || a.documentId).slice(0,3);
-      console.log('🆔 Available IDs:', ids);
-
-      // STEP 3: Try single article
-      console.log(`🔍 Fetching: ${API_BASE}/api/articles/${articleId}`);
-      const res = await fetch(`${API_BASE}/api/articles/${articleId}?populate=*`);
+      // Find article by id OR documentId
+      const targetArticle = allJson.data.find(article => 
+        article.id == paramId || article.documentId === paramId
+      );
       
-      console.log('📡 Response status:', res.status, res.statusText);
-      
-      if (!res.ok) {
+      if (!targetArticle) {
+        const availableIds = allJson.data.slice(0, 5).map(a => a.id).join(', ');
         document.getElementById('article-content').innerHTML = 
-          `<p style="color: red;">❌ HTTP ${res.status}: ${res.statusText}<br>Try IDs: ${ids?.join(', ') || 'None'}</p>`;
-        return;
-      }
-      
-      const json = await res.json();
-      console.log('📄 Article data:', json);
-      
-      const article = json.data;
-      if (!article) {
-        document.getElementById('article-content').innerHTML = '<p>Article not found. Check console for available IDs.</p>';
+          `<p style="color: red;">Article ${paramId} not found.<br>Available: ${availableIds}</p>`;
+        console.log('❌ No article found for ID:', paramId);
         return;
       }
 
-      const attrs = article.attributes || article;
-      
-      // Populate page
-      document.getElementById('article-image').src = getImageUrl(article);
-      document.getElementById('article-title').textContent = attrs.Title || 'Untitled';
+      console.log('✅ FOUND:', targetArticle.id, targetArticle.documentId);
+
+      const attrs = targetArticle.attributes || targetArticle;
+
+      // 🎯 Populate page with found article
+      document.getElementById('article-image').src = getImageUrl(targetArticle);
+      document.getElementById('article-title').textContent = attrs.Title || attrs.title || 'Untitled';
       document.getElementById('article-date').textContent = attrs.PublishDate || 'No date';
-      document.getElementById('article-author').textContent = `By ${attrs.Author || 'Unknown'}`;
+      document.getElementById('article-author').textContent = `By ${attrs.Author || attrs.author || 'Unknown'}`;
       document.getElementById('article-content').innerHTML = extractRichText(attrs.JournalContent || attrs.content);
 
+      console.log('✅ Article loaded successfully!');
+
     } catch (error) {
-      console.error('💥 Full error:', error);
-      document.getElementById('article-content').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+      console.error('💥 Error:', error);
+      document.getElementById('article-content').innerHTML = `<p>Error: ${error.message}</p>`;
     }
   }
 
   window.addEventListener('load', loadArticle);
 </script>
+
 
 </body>
 </html>

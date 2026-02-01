@@ -192,43 +192,28 @@
       }
     }
 
-    async function loadScrolls() {
-      try {
-        // Load WelcomeScroll (Left)
-        const welcomeRes = await fetch(`${API_BASE}/api/home-page-scrolls?populate=*&filters[ScrollName][$eq]=WelcomeScroll`);
-        const welcomeJson = await welcomeRes.json();
-        const welcomeData = welcomeJson.data && welcomeJson.data[0];
-        if (welcomeData) {
-          const leftScroll = document.querySelector('.left-scroll .scroll-paper p');
-          if (leftScroll) {
-            leftScroll.textContent = welcomeData.attributes?.ScrollText || welcomeData.ScrollText || 'Welcome message from Strapi!';
-          }
-        }
-      } catch (err) {
-        console.error("Error loading WelcomeScroll:", err);
+     async function loadScrolls() {
+    try {
+      const res = await fetch(`${API_BASE}/api/home-page-scrolls?populate=*`);
+      const json = await res.json();
+      const scrollData = json.data?.[0];
+      
+      if (scrollData) {
+        // Strapi v5 FLAT: WelcomeScroll / QuoteScroll direct on data
+        document.querySelector('.left-scroll .scroll-paper p').textContent = scrollData.WelcomeScroll;
+        document.querySelector('.right-scroll .scroll-paper p').textContent = scrollData.QuoteScroll;
       }
-
-      try {
-        // Load QuoteScroll (Right)
-        const quoteRes = await fetch(`${API_BASE}/api/home-page-scrolls?populate=*&filters[ScrollName][$eq]=QuoteScroll`);
-        const quoteJson = await quoteRes.json();
-        const quoteData = quoteJson.data && quoteJson.data[0];
-        if (quoteData) {
-          const rightScroll = document.querySelector('.right-scroll .scroll-paper p');
-          if (rightScroll) {
-            rightScroll.textContent = quoteData.attributes?.ScrollText || quoteData.ScrollText || 'Quote from Strapi!';
-          }
-        }
-      } catch (err) {
-        console.error("Error loading QuoteScroll:", err);
-      }
+    } catch (err) {
+      console.error('Scrolls error:', err);
     }
+  }
 
-    // Load everything when page loads
-    window.addEventListener('load', () => {
-      loadScrolls();
-      loadArticles();
-    });
+  // Your existing loadArticles() stays the same...
+
+  window.addEventListener('load', () => {
+    loadScrolls();
+    loadArticles();
+  });
   </script>
 </body>
 </html>

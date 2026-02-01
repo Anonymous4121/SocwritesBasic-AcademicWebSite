@@ -5,135 +5,115 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Article - SocWrites Journal</title>
   <link rel="stylesheet" href="./css/HomePage.css" />
-  <link rel="stylesheet" href="./css/PublicationsPage.css" />
   <style>
-/* ================= HEADER ================= */
-.article-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--pearl);
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
-  font-family: 'Playfair Display', serif;
-}
-.back-btn {
-  background: none;
-  border: none;
-  font-size: 1.6rem;
-  color: var(--gold);
-  cursor: pointer;
-  font-weight: bold;
-  margin-right: 16px;
-}
-.article-header-title {
-  flex: 1;
-  text-align: center;
-  font-size: 2rem;
-  color: var(--gold);
-  letter-spacing: 1px;
-  font-family: inherit;
-}
-.article-logo {
-  height: 48px;
-  width: auto;
-  margin-left: 16px;
-}
+    /* ================= HEADER ================= */
+    :root {
+      --bg: #fdf5e6;
+      --white: #ffffff;
+      --text: #2a2a2a;
+      --gold: #d4af37;
+      --gold-hover: #e1c275;
+      --taupe: #bca97e;
+      --border: #ddd2c0;
+      --pearl: #f8f4ee;
+    }
 
-/* ================= SINGLE ARTICLE PAGE ================= */
-.article-main {
-  max-width: 1200px;
-  margin: 2rem auto 0 auto;
-  background: var(--pearl);
-  border-radius: 12px;
-  box-shadow: 0 1px 8px rgba(0,0,0,0.07);
-  padding: 2.2rem 20px 2rem 20px;
-  font-family: 'Merriweather', serif;
-}
-.article-image {
-  display: block;              /* make it behave like a block */
-  margin: 0 auto 1.2rem auto;  /* auto left/right centers it */
-  width: 900px;
-  max-height: 340px;
-  object-fit: cover;
-  border-radius: 10px;
-  background: var(--white);
-  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
-}
-.article-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 2.1rem;
-  color: var(--gold);
-  margin-bottom: 1.1rem;
-  text-align: center;
-  font-weight: 600;
-}
-.article-meta {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1.4rem;
-  font-size: 1rem;
-  color: var(--taupe);
-}
-.article-content {
-  font-size: 1.17rem;
-  color: var(--text);
-  line-height: 1.7;
-  white-space: pre-line;
-}
-.header-separator {
-  width: 80%;
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 0.5rem auto;
-}
-/* ================= ARTICLES LIST PAGE ================= */
-.article {
-  display: flex;
-  align-items: flex-start;
-  gap: 15px;
-  margin: 20px auto;
-  max-width: 900px;
-  padding: 15px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-.article img {
-  width: 180px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 6px;
-}
-.article-content {
-  flex: 1;
-}
-.article-content h3 {
-  font-size: 1.2rem;
-  margin-bottom: 8px;
-}
-.article-content p {
-  font-size: 0.95rem;
-  color: #555;
-}
+    .article-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--pearl);
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      font-family: 'Playfair Display', serif;
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      font-size: 1.6rem;
+      color: var(--gold);
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 16px;
+    }
+    .article-header-title {
+      flex: 1;
+      text-align: center;
+      font-size: 2rem;
+      color: var(--gold);
+      letter-spacing: 1px;
+      font-family: inherit;
+    }
+    .article-logo {
+      height: 48px;
+      width: auto;
+      margin-left: 16px;
+    }
 
-/* ================= RESPONSIVE ================= */
-@media (max-width: 600px) {
-  .article-header-title { font-size: 1.25rem; }
-  .article-title { font-size: 1.3rem; }
-  .article-logo { height: 32px; }
+    /* ================= SINGLE ARTICLE PAGE ================= */
+    .article-main {
+      max-width: 1200px;
+      margin: 2rem auto 0 auto;
+      background: var(--pearl);
+      border-radius: 12px;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.07);
+      padding: 2.2rem 20px 2rem 20px;
+      font-family: 'Merriweather', serif;
+    }
+    .article-image {
+      display: block;
+      margin: 0 auto 1.2rem auto;
+      width: 100%;
+      max-width: 900px;
+      max-height: 340px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: var(--white);
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    }
+    .article-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.1rem;
+      color: var(--gold);
+      margin-bottom: 1.1rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    .article-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1.4rem;
+      font-size: 1rem;
+      color: var(--taupe);
+    }
+    .article-content {
+      font-size: 1.17rem;
+      color: var(--text);
+      line-height: 1.7;
+      white-space: pre-line;
+    }
+    .article-content h1, .article-content h2, .article-content h3 {
+      color: var(--gold);
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+    .article-content p {
+      margin-bottom: 1.2rem;
+    }
+    .header-separator {
+      width: 80%;
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.5rem auto;
+    }
 
-  .article {
-    flex-direction: column;
-    text-align: center;
-  }
-  .article img {
-    width: 100%;
-    height: auto;
-    margin-bottom: 10px;
-  }
-}
-
+    /* ================= RESPONSIVE ================= */
+    @media (max-width: 600px) {
+      .article-header-title { font-size: 1.25rem; }
+      .article-title { font-size: 1.6rem; }
+      .article-logo { height: 32px; }
+      .article-image { width: 100%; height: auto; }
+    }
   </style>
 </head>
 <body>
@@ -148,17 +128,17 @@
   <main>
     <div class="article-main">
       <img id="article-image" src="./images/logo/DefaultImage.svg" alt="Article Image" class="article-image"/>
-      <div class="article-title" id="article-title"></div>
+      <div class="article-title" id="article-title">Loading...</div>
       <div class="article-meta">
-        <span id="article-date">Date</span>
-        <span id="article-author">By Author</span>
+        <span id="article-date">Loading...</span>
+        <span id="article-author">Loading...</span>
       </div>
       <hr class="header-separator" />
-      <div class="article-content" id="article-content"></div>
+      <div class="article-content" id="article-content">Loading article content...</div>
     </div>
   </main>
 
-  <!-- FOOTER (same as all pages) -->
+  <!-- FOOTER -->
   <footer class="site-footer">
     <div class="footer-container">
       <div class="footer-column">
@@ -182,79 +162,116 @@
         <p>Phone: +91 9650XXX101</p>
         <p>New Delhi, India</p>
         <div class="social-icons">
-          <a href="https://www.facebook.com"><img src="/.images/logo/Facebook.svg" alt="Facebook" /></a>
-          <a href="https://www.instagram.com/thesocwrites"><img src="/.images/logo/Instagram.svg" alt="Instagram" /></a>
+          <a href="https://www.facebook.com"><img src="./images/logo/Facebook.svg" alt="Facebook" /></a>
+          <a href="https://www.instagram.com/thesocwrites?igsh=MjI5czdtcHlpaW5r"><img src="./images/logo/Instagram.svg" alt="Instagram" /></a>
         </div>
       </div>
     </div>
   </footer>
 
-  <!-- Article Data Demo Script (static version, you can switch to CMS fetch later) -->
   <script>
-  const API_BASE = "https://glowing-star-d89f1652ea.strapiapp.com";
+    const API_BASE = "https://glowing-star-d89f1652ea.strapiapp.com";
 
-  // Get article ID from URL
-  function getParam(name) {
-    return new URLSearchParams(window.location.search).get(name);
-  }
-
-  async function loadArticle() {
-    const articleId = getParam('id');
-    if (!articleId) {
-      document.getElementById('article-content').innerHTML = '<p>Article ID missing.</p>';
-      return;
+    // Get article ID from URL (?id=2)
+    function getParam(name) {
+      return new URLSearchParams(window.location.search).get(name);
     }
 
-    try {
-      const res = await fetch(`${API_BASE}/api/articles/${articleId}?populate=*`);
-      const json = await res.json();
-      const article = json.data;
+    // Extract image URL from Strapi response
+    function getImageUrl(article) {
+      try {
+        // Strapi v5 flat structure (your case)
+        if (article.ArticleImage?.url) return API_BASE + article.ArticleImage.url;
+        if (article.ArticleImage?.data?.attributes?.url) return API_BASE + article.ArticleImage.data.attributes.url;
+        
+        // Strapi v4 nested attributes
+        if (article.attributes?.ArticleImage?.data?.attributes?.url) {
+          return API_BASE + article.attributes.ArticleImage.data.attributes.url;
+        }
+      } catch (e) {
+        console.error('Image URL error:', e);
+      }
+      return "./images/logo/DefaultImage.svg";
+    }
+
+    // Convert Strapi rich text to HTML
+    function extractRichText(content) {
+      if (!content) return '<p>No content available.</p>';
       
-      if (!article) {
-        document.getElementById('article-content').innerHTML = '<p>Article not found.</p>';
+      // If it's plain string
+      if (typeof content === 'string') return `<p>${content}</p>`;
+      
+      // If it's rich text array (Strapi format)
+      if (Array.isArray(content)) {
+        return content.map(block => {
+          if (!block.children) return '';
+          
+          const text = block.children.map(child => child.text || '').join('');
+          if (block.type === 'heading') {
+            return `<h${block.level || 2}>${text}</h${block.level || 2}>`;
+          }
+          return `<p>${text}</p>`;
+        }).join('');
+      }
+      
+      return '<p>Content format not recognized.</p>';
+    }
+
+    // Load single article by ID
+    async function loadArticle() {
+      const articleId = getParam('id');
+      if (!articleId) {
+        document.getElementById('article-content').innerHTML = '<p>No article ID found in URL.</p>';
         return;
       }
 
-      const attrs = article.attributes || article;  // v5 flat or v4 nested
-      
-      // Populate page
-      document.getElementById('article-image').src = getImageUrl(article) || './images/logo/DefaultImage.svg';
-      document.getElementById('article-title').textContent = attrs.Title || attrs.title || 'Untitled';
-      document.getElementById('article-date').textContent = attrs.PublishDate || 'No date';
-      document.getElementById('article-author').textContent = `By ${attrs.Author || 'Unknown'}`;
-      
-      // Full rich text content (handles Strapi rich text structure)
-      const fullContent = extractRichText(attrs.JournalContent || attrs.content);
-      document.getElementById('article-content').innerHTML = fullContent;
+      try {
+        console.log('Loading article ID:', articleId);
+        
+        // Fetch single article
+        const response = await fetch(`${API_BASE}/api/articles/${articleId}?populate=*`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const json = await response.json();
+        const article = json.data;
+        
+        if (!article) {
+          document.getElementById('article-content').innerHTML = '<p>Article not found.</p>';
+          return;
+        }
 
-    } catch (err) {
-      console.error('Article error:', err);
-      document.getElementById('article-content').innerHTML = `<p>Error loading article: ${err.message}</p>`;
+        console.log('Article loaded:', article);
+
+        // Handle both Strapi v5 flat and v4 nested structures
+        const attrs = article.attributes || article;
+
+        // Set image
+        const imgSrc = getImageUrl(article);
+        const imgElement = document.getElementById('article-image');
+        imgElement.src = imgSrc;
+        imgElement.onerror = () => { imgElement.src = './images/logo/DefaultImage.svg'; };
+
+        // Set title, date, author
+        document.getElementById('article-title').textContent = attrs.Title || attrs.title || 'Untitled Article';
+        document.getElementById('article-date').textContent = attrs.PublishDate || 'No date';
+        document.getElementById('article-author').textContent = `By ${attrs.Author || attrs.author || 'Unknown Author'}`;
+
+        // Set full content
+        const content = extractRichText(attrs.JournalContent || attrs.content);
+        document.getElementById('article-content').innerHTML = content;
+
+      } catch (error) {
+        console.error('Article load error:', error);
+        document.getElementById('article-content').innerHTML = 
+          `<p style="color: red;">Error loading article: ${error.message}</p>`;
+      }
     }
-  }
 
-  // Rich text to HTML converter
-  function extractRichText(richText) {
-    if (!richText || !Array.isArray(richText)) return '<p>No content available.</p>';
-    
-    return richText.map(block => {
-      if (block.type === 'heading') return `<h${block.level || 2}>${block.children?.map(c => c.text || '').join('')}</h${block.level || 2}>`;
-      if (block.children) return `<p>${block.children.map(c => c.text || '').join('')}</p>`;
-      return '';
-    }).join('');
-  }
-
-  // Image URL helper
-  function getImageUrl(article) {
-    const imgUrl = article.ArticleImage?.data?.attributes?.url || 
-                   article.attributes?.ArticleImage?.data?.attributes?.url ||
-                   article.ArticleImage?.url;
-    return imgUrl ? API_BASE + imgUrl : null;
-  }
-
-  // Load article on page ready
-  window.addEventListener('load', loadArticle);
-</script>
-
+    // Load article when page loads
+    window.addEventListener('load', loadArticle);
+  </script>
 </body>
 </html>

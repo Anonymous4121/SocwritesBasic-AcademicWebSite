@@ -182,8 +182,8 @@
         <p>Phone: +91 9650XXX101</p>
         <p>New Delhi, India</p>
         <div class="social-icons">
-          <a href="https://www.facebook.com"><img src="images/logo/Facebook.svg" alt="Facebook" /></a>
-          <a href="https://www.instagram.com/thesocwrites"><img src="images/logo/Instagram.svg" alt="Instagram" /></a>
+          <a href="https://www.facebook.com"><img src="/.images/logo/Facebook.svg" alt="Facebook" /></a>
+          <a href="https://www.instagram.com/thesocwrites"><img src="/.images/logo/Instagram.svg" alt="Instagram" /></a>
         </div>
       </div>
     </div>
@@ -191,46 +191,70 @@
 
   <!-- Article Data Demo Script (static version, you can switch to CMS fetch later) -->
   <script>
-    // Demo: Static example. When using CMS, replace this part with API fetch
-    // You can expand this structure for more articles
-    const sampleArticles = [
-      {
-        id: "1",
-        image: "images/logo/DefaultImage.svg",
-        title: "Understanding Rural Education Gaps",
-        date: "August 2025",
-        author: "Dr. Meera S.",
-        content: "This is the full article content about rural education gaps..."
-      },
-      {
-        id: "2",
-        image: "",
-        title: "Women in Urban Workforce",
-        date: "July 2025",
-        author: "R. Singh",
-        content: "Insights and research on women participation in the urban workforce..."
-      }
-    ];
+  const API_BASE = "https://glowing-star-d89f1652ea.strapiapp.com";
 
-    // Get article ID from URL
-    function getParam(name){
-      const params = new URLSearchParams(window.location.search);
-      return params.get(name);
+  // Get article ID from URL
+  function getParam(name) {
+    return new URLSearchParams(window.location.search).get(name);
+  }
+
+  async function loadArticle() {
+    const articleId = getParam('id');
+    if (!articleId) {
+      document.getElementById('article-content').innerHTML = '<p>Article ID missing.</p>';
+      return;
     }
 
-    const articleId = getParam('id') || "1";
-    const article = sampleArticles.find(a => a.id === articleId);
+    try {
+      const res = await fetch(`${API_BASE}/api/articles/${articleId}?populate=*`);
+      const json = await res.json();
+      const article = json.data;
+      
+      if (!article) {
+        document.getElementById('article-content').innerHTML = '<p>Article not found.</p>';
+        return;
+      }
 
-    document.getElementById('article-image').src = article && article.image ? article.image : "images/logo/DefaultImage.svg";
-    document.getElementById('article-title').textContent = article ? article.title : "Article not found";
-    document.getElementById('article-date').textContent = article ? article.date : "";
-    document.getElementById('article-author').textContent = article ? "By " + article.author : "";
-    document.getElementById('article-content').textContent = article ? article.content : "Sorry, this article could not be found.";
+      const attrs = article.attributes || article;  // v5 flat or v4 nested
+      
+      // Populate page
+      document.getElementById('article-image').src = getImageUrl(article) || './images/logo/DefaultImage.svg';
+      document.getElementById('article-title').textContent = attrs.Title || attrs.title || 'Untitled';
+      document.getElementById('article-date').textContent = attrs.PublishDate || 'No date';
+      document.getElementById('article-author').textContent = `By ${attrs.Author || 'Unknown'}`;
+      
+      // Full rich text content (handles Strapi rich text structure)
+      const fullContent = extractRichText(attrs.JournalContent || attrs.content);
+      document.getElementById('article-content').innerHTML = fullContent;
 
-    // Fallback for empty image path
-    document.getElementById('article-image').onerror = function() {
-      this.src = "images/logo/DefaultImage.svg";
-    };
-  </script>
+    } catch (err) {
+      console.error('Article error:', err);
+      document.getElementById('article-content').innerHTML = `<p>Error loading article: ${err.message}</p>`;
+    }
+  }
+
+  // Rich text to HTML converter
+  function extractRichText(richText) {
+    if (!richText || !Array.isArray(richText)) return '<p>No content available.</p>';
+    
+    return richText.map(block => {
+      if (block.type === 'heading') return `<h${block.level || 2}>${block.children?.map(c => c.text || '').join('')}</h${block.level || 2}>`;
+      if (block.children) return `<p>${block.children.map(c => c.text || '').join('')}</p>`;
+      return '';
+    }).join('');
+  }
+
+  // Image URL helper
+  function getImageUrl(article) {
+    const imgUrl = article.ArticleImage?.data?.attributes?.url || 
+                   article.attributes?.ArticleImage?.data?.attributes?.url ||
+                   article.ArticleImage?.url;
+    return imgUrl ? API_BASE + imgUrl : null;
+  }
+
+  // Load article on page ready
+  window.addEventListener('load', loadArticle);
+</script>
+
 </body>
 </html>

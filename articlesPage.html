@@ -170,108 +170,96 @@
   </footer>
 
   <script>
-    const API_BASE = "https://glowing-star-d89f1652ea.strapiapp.com";
+  const API_BASE = "https://glowing-star-d89f1652ea.strapiapp.com";
 
-    // Get article ID from URL (?id=2)
-    function getParam(name) {
-      return new URLSearchParams(window.location.search).get(name);
+  function getParam(name) {
+    return new URLSearchParams(window.location.search).get(name);
+  }
+
+  function getImageUrl(article) {
+    try {
+      // Try multiple Strapi structures
+      if (article.ArticleImage?.url) return API_BASE + article.ArticleImage.url;
+      if (article.ArticleImage?.data?.attributes?.url) return API_BASE + article.ArticleImage.data.attributes.url;
+      if (article.attributes?.ArticleImage?.data?.attributes?.url) return API_BASE + article.attributes.ArticleImage.data.attributes.url;
+    } catch (e) {}
+    return "./images/logo/DefaultImage.svg";
+  }
+
+  function extractRichText(content) {
+    if (!content) return '<p>No content available.</p>';
+    if (typeof content === 'string') return `<p>${content}</p>`;
+    if (Array.isArray(content)) {
+      return content.map(block => {
+        if (!block.children) return '';
+        const text = block.children.map(child => child.text || '').join('');
+        return block.typeB === 'heading' ? `<h2>${text}</h2>` : `<p>${text}</p>`;
+      }).join('');
+    }
+    return '<p>Content not recognized.</p>';
+  }
+
+  async function loadArticle() {
+    const articleId = getParam('id');
+    
+    // STEP 1: Debug - Show what ID we're getting
+    console.log('🔍 URL ID:', articleId);
+    document.getElementById('article-title').textContent = `Loading ID: ${articleId || 'NO ID'}`;
+    
+    if (!articleId) {
+      document.getElementById('article-content').innerHTML = '<p style="color: red;">❌ No article ID in URL. Use: ?id=1</p>';
+      return;
     }
 
-    // Extract image URL from Strapi response
-    function getImageUrl(article) {
-      try {
-        // Strapi v5 flat structure (your case)
-        if (article.ArticleImage?.url) return API_BASE + article.ArticleImage.url;
-        if (article.ArticleImage?.data?.attributes?.url) return API_BASE + article.ArticleImage.data.attributes.url;
-        
-        // Strapi v4 nested attributes
-        if (article.attributes?.ArticleImage?.data?.attributes?.url) {
-          return API_BASE + article.attributes.ArticleImage.data.attributes.url;
-        }
-      } catch (e) {
-        console.error('Image URL error:', e);
+    try {
+      // STEP 2: Test ALL articles first (find your real IDs)
+      console.log('🔍 Testing ALL articles...');
+      const allRes = await fetch(`${API_BASE}/api/articles?populate=*`);
+      const allJson = await allRes.json();
+      console.log('📋 ALL ARTICLES:', allJson.data);
+      
+      // Show first 3 article IDs
+      const ids = allJson.data?.map(a => a.id || a.documentId).slice(0,3);
+      console.log('🆔 Available IDs:', ids);
+
+      // STEP 3: Try single article
+      console.log(`🔍 Fetching: ${API_BASE}/api/articles/${articleId}`);
+      const res = await fetch(`${API_BASE}/api/articles/${articleId}?populate=*`);
+      
+      console.log('📡 Response status:', res.status, res.statusText);
+      
+      if (!res.ok) {
+        document.getElementById('article-content').innerHTML = 
+          `<p style="color: red;">❌ HTTP ${res.status}: ${res.statusText}<br>Try IDs: ${ids?.join(', ') || 'None'}</p>`;
+        return;
       }
-      return "./images/logo/DefaultImage.svg";
-    }
-
-    // Convert Strapi rich text to HTML
-    function extractRichText(content) {
-      if (!content) return '<p>No content available.</p>';
       
-      // If it's plain string
-      if (typeof content === 'string') return `<p>${content}</p>`;
+      const json = await res.json();
+      console.log('📄 Article data:', json);
       
-      // If it's rich text array (Strapi format)
-      if (Array.isArray(content)) {
-        return content.map(block => {
-          if (!block.children) return '';
-          
-          const text = block.children.map(child => child.text || '').join('');
-          if (block.type === 'heading') {
-            return `<h${block.level || 2}>${text}</h${block.level || 2}>`;
-          }
-          return `<p>${text}</p>`;
-        }).join('');
-      }
-      
-      return '<p>Content format not recognized.</p>';
-    }
-
-    // Load single article by ID
-    async function loadArticle() {
-      const articleId = getParam('id');
-      if (!articleId) {
-        document.getElementById('article-content').innerHTML = '<p>No article ID found in URL.</p>';
+      const article = json.data;
+      if (!article) {
+        document.getElementById('article-content').innerHTML = '<p>Article not found. Check console for available IDs.</p>';
         return;
       }
 
-      try {
-        console.log('Loading article ID:', articleId);
-        
-        // Fetch single article
-        const response = await fetch(`${API_BASE}/api/articles/${articleId}?populate=*`);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const json = await response.json();
-        const article = json.data;
-        
-        if (!article) {
-          document.getElementById('article-content').innerHTML = '<p>Article not found.</p>';
-          return;
-        }
+      const attrs = article.attributes || article;
+      
+      // Populate page
+      document.getElementById('article-image').src = getImageUrl(article);
+      document.getElementById('article-title').textContent = attrs.Title || 'Untitled';
+      document.getElementById('article-date').textContent = attrs.PublishDate || 'No date';
+      document.getElementById('article-author').textContent = `By ${attrs.Author || 'Unknown'}`;
+      document.getElementById('article-content').innerHTML = extractRichText(attrs.JournalContent || attrs.content);
 
-        console.log('Article loaded:', article);
-
-        // Handle both Strapi v5 flat and v4 nested structures
-        const attrs = article.attributes || article;
-
-        // Set image
-        const imgSrc = getImageUrl(article);
-        const imgElement = document.getElementById('article-image');
-        imgElement.src = imgSrc;
-        imgElement.onerror = () => { imgElement.src = './images/logo/DefaultImage.svg'; };
-
-        // Set title, date, author
-        document.getElementById('article-title').textContent = attrs.Title || attrs.title || 'Untitled Article';
-        document.getElementById('article-date').textContent = attrs.PublishDate || 'No date';
-        document.getElementById('article-author').textContent = `By ${attrs.Author || attrs.author || 'Unknown Author'}`;
-
-        // Set full content
-        const content = extractRichText(attrs.JournalContent || attrs.content);
-        document.getElementById('article-content').innerHTML = content;
-
-      } catch (error) {
-        console.error('Article load error:', error);
-        document.getElementById('article-content').innerHTML = 
-          `<p style="color: red;">Error loading article: ${error.message}</p>`;
-      }
+    } catch (error) {
+      console.error('💥 Full error:', error);
+      document.getElementById('article-content').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
     }
+  }
 
-    // Load article when page loads
-    window.addEventListener('load', loadArticle);
-  </script>
+  window.addEventListener('load', loadArticle);
+</script>
+
 </body>
 </html>

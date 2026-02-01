@@ -162,7 +162,7 @@
                 <h3>${featAttrs.Title || featAttrs.title || 'Untitled'}</h3>
                 <p class="meta">By ${featAttrs.Author || featAttrs.author || 'Unknown Author'} | ${featAttrs.PublishDate || featAttrs.publishDate || 'No date'}</p>
                 <p>${extractRichText(featAttrs.JournalContent || featAttrs.content)}</p>
-                <a class="read-more" href="./articlesPage.html?id=${feat.id}">Read more →</a>
+                <a class="read-more" href="./articlesPage.html?id=${feat.id || feat.documentId}">Read more →</a>
               </article>
             `;
           });

@@ -110,13 +110,13 @@
 
         // Filter featured (isFeatured: true) - limit 3
         const featuredArticles = articles.filter(article => 
-          (article.attributes?.isFeatured || article.isFeatured) === true
+          (article.attributes?.featuredArticle || article.featuredArticle) === true
         ).slice(0, 3);
 
         // Rest as recent (newest first)
         const recentArticles = articles
           .filter(article => 
-            (article.attributes?.isFeatured || article.isFeatured) !== true
+            (article.attributes?.featuredArticle || article.featuredArticle) !== true
           )
           .sort((a, b) => new Date(b.attributes?.PublishDate || b.PublishDate) - new Date(a.attributes?.PublishDate || a.PublishDate));
 

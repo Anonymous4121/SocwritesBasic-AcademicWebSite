@@ -6,9 +6,13 @@
   <title>Publications</title>
   <link rel="stylesheet" href="css/PublicationsPage.css" />
   <link rel="stylesheet" href="css/HomePage.css" />
+  <style>
+    .loading { text-align: center; color: var(--taupe); font-style: italic; }
+    .error-msg { color: #d32f2f; background: #ffebee; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
+  </style>
 </head>
 <body>
-  <!-- Header (your exact original) -->
+  <!-- Header -->
   <header>
     <div class="container centered-header">
       <img src="./images/logo/logo3.png" alt="SocWrites Logo" class="logo" />
@@ -26,50 +30,41 @@
   </header>
 
   <main class="container">
-    <!-- Search Section -->
+    <!-- Search Button + Expandable Search Bar -->
     <div class="search-section">
-      <button id="search-toggle">🔍 Search</button>
+      <button id="search-toggle">Search</button>
       <input type="text" id="search-bar" placeholder="Search articles..." />
     </div>
 
-    <!-- Search Overlay - HIDDEN BY CSS -->
-    <div id="search-overlay">
+    <!-- Search Overlay (initially hidden) -->
+    <div id="search-overlay" style="display:none;">
       <div class="search-page-inner">
         <button id="close-search-overlay" class="close-btn">&times;</button>
         <h2>Search Articles</h2>
         <input type="text" id="overlay-search-bar" placeholder="Type to search articles...">
         <div id="overlay-articles-grid" class="publications-grid"></div>
-        <p id="overlay-no-results">No results found.</p>
+        <p id="overlay-no-results" style="display:none; text-align:center; margin-top:2rem; font-size:1.2rem; color:var(--taupe);font-style:italic;">No results found.</p>
       </div>
     </div>
 
-    <!-- Publications Grid - 12 SKELETONS -->
+    <!-- Articles Grid -->
     <section class="publications-grid" id="publications-grid">
-      <!-- 12 Skeleton Cards -->
-      ${Array.from({length: 12}, (_, i) => `
-        <article class="pub-card" style="
-          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-          background-size: 200% 100%;
-          animation: loading 1.5s infinite;
-          animation-delay: ${i * 0.1}s;
-        ">
-          <div style="height:150px;background:#f0f0f0;border-radius:6px;"></div>
-          <div style="height:20px;background:#f0f0f0;border-radius:4px;margin:8px 0;width:80%;"></div>
-          <div style="height:16px;background:#f0f0f0;border-radius:4px;width:60%;"></div>
-        </article>
-      `).join('')}
+      <div class="loading">Loading articles from Strapi...</div>
     </section>
 
-    <!-- Pagination -->
+    <!-- Pagination Controls -->
     <div class="pagination-nav">
       <button id="back-page-btn" style="visibility: hidden;">&larr; Back</button>
       <button id="next-page-btn" disabled>Next &rarr;</button>
     </div>
     
-    <p id="no-results-msg" style="display:none;">No articles found.</p>
+    <!-- No results message -->
+    <p id="no-results-msg" style="display:none; text-align:center; margin-top: 1rem; font-style: italic; color: var(--taupe);">
+      No articles found.
+    </p>
   </main>
 
-  <!-- Footer (your exact original) -->
+  <!-- Footer -->
   <footer class="site-footer">
     <div class="footer-container">
       <div class="footer-column">
@@ -102,140 +97,196 @@
 
   <script>
     const API_BASE = "https://glowing-star-d89f1652ea.strapiapp.com";
-    const CACHE_KEY = 'strapi_articles_v1';
-    const CACHE_DURATION = 5 * 60 * 1000; // 5 min
-    
-    let allArticles = [], page = 0, paginatedFiltered = [];
+    const grid = document.getElementById('publications-grid');
+    const nextBtn = document.getElementById('next-page-btn');
+    const backBtn = document.getElementById('back-page-btn');
+    const noResultsMsg = document.getElementById('no-results-msg');
     const ARTICLES_PER_PAGE = 12;
+    let allArticles = [];
+    let page = 0;
+    let paginatedFiltered = [];
 
-    function createArticleCard(article) {
+    // Navigation helper - uses article.id (matches articlesPage.html)
+    function goToArticle(articleId) {
+      window.location.href = `./articlesPage.html?id=${articleId}`;
+    }
+
+    // Create article card from Strapi data
+    function createArticleCard(article, index) {
       const attrs = article.attributes || article;
       const id = article.id;
-      const title = (attrs.Title || 'Untitled').substring(0, 60);
-      const author = attrs.Author || 'Unknown';
-      const date = attrs.PublishDate?.split('T')[0] || 'No date';
-      const imgUrl = attrs.ArticleImage?.data?.attributes?.url 
-        ? `${API_BASE}${attrs.ArticleImage.data.attributes.url}` 
-        : './images/logo/DefaultImage.svg';
+      const title = attrs.Title || attrs.title || 'Untitled';
+      const author = attrs.Author || attrs.author || 'Unknown';
+      const publishDate = attrs.PublishDate || 'No date';
+      const imgUrl = getImageUrl(article);
 
       const card = document.createElement('article');
       card.className = 'pub-card';
-      card.dataset.id = id;
+      card.setAttribute('data-id', id);
+      card.style.cursor = 'pointer';
+      
       card.innerHTML = `
-        <img src="${imgUrl}" alt="${title}" loading="lazy" 
-             onerror="this.src='./images/logo/DefaultImage.svg'" />
-        <h3 title="${title}">${title}</h3>
-        <p class="meta">By ${author} | ${date}</p>
+        <img src="${imgUrl}" alt="${title}" onerror="this.src='./images/logo/DefaultImage.svg'" />
+        <h3>${title}</h3>
+        <p class="meta">By ${author} | ${publishDate}</p>
       `;
-      card.onclick = () => window.location.href = `./articlesPage.html?id=${id}`;
+
+      // Make clickable
+      card.addEventListener('click', () => goToArticle(id));
       return card;
     }
 
-    async function loadArticles() {
-      const grid = document.getElementById('publications-grid');
-      
-      // ⚡ 1. TRY CACHE FIRST
-      const cached = localStorage.getItem(CACHE_KEY);
-      const cacheTime = localStorage.getItem(`${CACHE_KEY}_time`);
-      if (cached && cacheTime && Date.now() - parseInt(cacheTime) < CACHE_DURATION) {
-        allArticles = JSON.parse(cached);
-        renderPage();
-        console.log('⚡ CACHE HIT - Instant load!');
-        return;
-      }
-
-      // ⚡ 2. OPTIMIZED API CALL
+    // Get Strapi image URL
+    function getImageUrl(article) {
       try {
-        const response = await fetch(
-          `${API_BASE}/api/articles?populate=ArticleImage&fields[0]=Title&fields[1]=Author&fields[2]=PublishDate`
-        );
+        if (article.ArticleImage?.data?.attributes?.url) {
+          return API_BASE + article.ArticleImage.data.attributes.url;
+        }
+        if (article.attributes?.ArticleImage?.data?.attributes?.url) {
+          return API_BASE + article.attributes.ArticleImage.data.attributes.url;
+        }
+      } catch (e) {}
+      return "./images/logo/DefaultImage.svg";
+    }
+
+    // Load all articles from Strapi
+    async function loadArticles() {
+      try {
+        grid.innerHTML = '<div class="loading">🔄 Fetching articles from Strapi...</div>';
+        
+        const response = await fetch(`${API_BASE}/api/articles?populate=*`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
         const json = await response.json();
         allArticles = json.data || [];
         
-        // Save cache
-        localStorage.setItem(CACHE_KEY, JSON.stringify(allArticles));
-        localStorage.setItem(`${CACHE_KEY}_time`, Date.now().toString());
+        console.log('📚 Loaded', allArticles.length, 'articles');
         
+        if (allArticles.length === 0) {
+          grid.innerHTML = '<div class="loading">No articles found in Strapi.</div>';
+          return;
+        }
+
+        // Render initial page
+        paginatedFiltered = allArticles;
         renderPage();
+        
       } catch (error) {
-        grid.innerHTML = '<article class="pub-card" style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--taupe);"><p>Failed to load articles</p></article>';
+        console.error('Strapi error:', error);
+        grid.innerHTML = `
+          <div class="error-msg">
+            ❌ Failed to load articles: ${error.message}<br>
+            <small>Check Strapi permissions: Public → Articles → find</small>
+          </div>
+        `;
       }
     }
 
+    // Pagination
     function renderPage() {
-      const grid = document.getElementById('publications-grid');
       grid.innerHTML = '';
       
       const start = page * ARTICLES_PER_PAGE;
       const end = start + ARTICLES_PER_PAGE;
-      paginatedFiltered = allArticles;
+      const pageArticles = paginatedFiltered.slice(start, end);
+
+      if (pageArticles.length === 0) {
+        noResultsMsg.style.display = 'block';
+        nextBtn.style.display = 'none';
+        backBtn.style.display = 'none';
+        return;
+      }
+
+      noResultsMsg.style.display = 'none';
       
-      allArticles.slice(start, end).forEach(article => {
-        grid.appendChild(createArticleCard(article));
+      pageArticles.forEach(article => {
+        const card = createArticleCard(article);
+        grid.appendChild(card);
       });
 
-      // Pagination buttons
-      const totalPages = Math.ceil(allArticles.length / ARTICLES_PER_PAGE);
-      document.getElementById('back-page-btn').style.visibility = page > 0 ? 'visible' : 'hidden';
-      document.getElementById('next-page-btn').disabled = page >= totalPages - 1 || totalPages <= 1;
+      const totalPages = Math.ceil(paginatedFiltered.length / ARTICLES_PER_PAGE);
+      backBtn.style.visibility = page > 0 ? 'visible' : 'hidden';
+      nextBtn.disabled = page >= totalPages - 1;
+      
+      if (totalPages <= 1) {
+        nextBtn.style.display = 'none';
+        backBtn.style.display = 'none';
+      } else {
+        nextBtn.style.display = 'inline-block';
+        backBtn.style.display = 'inline-block';
+      }
     }
 
-    // 🖱️ Event Listeners
-    document.getElementById('next-page-btn').onclick = () => {
-      const totalPages = Math.ceil(allArticles.length / ARTICLES_PER_PAGE);
-      if (page < totalPages - 1) {
-        page++;
-        renderPage();
-        window.scrollTo({top: 0, behavior: 'smooth'});
-      }
-    };
+    // Search functionality
+    const searchToggleBtn = document.getElementById("search-toggle");
+    const overlay = document.getElementById('search-overlay');
+    const overlayCloseBtn = document.getElementById('close-search-overlay');
+    const overlaySearchInput = document.getElementById('overlay-search-bar');
+    const overlayArticlesGrid = document.getElementById('overlay-articles-grid');
+    const overlayNoResults = document.getElementById('overlay-no-results');
 
-    document.getElementById('back-page-btn').onclick = () => {
-      if (page > 0) {
-        page--;
-        renderPage();
-        window.scrollTo({top: 0, behavior: 'smooth'});
-      }
-    };
-
-    // 🔍 Search Overlay
-    document.getElementById('search-toggle').onclick = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      document.getElementById('search-overlay').style.display = 'block';
-      document.getElementById('overlay-search-bar').focus();
-    };
-
-    document.getElementById('close-search-overlay').onclick = () => {
-      document.getElementById('search-overlay').style.display = 'none';
-    };
-
-    document.getElementById('overlay-search-bar').oninput = (e) => {
-      const query = e.target.value.toLowerCase();
-      const overlayGrid = document.getElementById('overlay-articles-grid');
-      overlayGrid.innerHTML = '';
+    function showOverlayArticles(query) {
+      overlayArticlesGrid.innerHTML = '';
       
       const filtered = allArticles.filter(article => {
         const attrs = article.attributes || article;
-        return (attrs.Title?.toLowerCase().includes(query) || 
-                attrs.Author?.toLowerCase().includes(query));
+        const title = (attrs.Title || attrs.title || '').toLowerCase();
+        const author = (attrs.Author || attrs.author || '').toLowerCase();
+        return title.includes(query.toLowerCase()) || author.includes(query.toLowerCase());
       });
-      
-      filtered.slice(0, 20).forEach(article => {
-        overlayGrid.appendChild(createArticleCard(article));
-      });
-      
-      document.getElementById('overlay-no-results').style.display = filtered.length ? 'none' : 'block';
-    };
 
-    // ESC closes overlay
-    document.onkeydown = (e) => {
-      if (e.key === 'Escape') {
-        document.getElementById('search-overlay').style.display = 'none';
+      if (filtered.length === 0) {
+        overlayArticlesGrid.style.display = "none";
+        overlayNoResults.style.display = "block";
+      } else {
+        overlayArticlesGrid.style.display = "grid";
+        overlayNoResults.style.display = "none";
+        filtered.forEach(article => {
+          const card = createArticleCard(article);
+          overlayArticlesGrid.appendChild(card);
+        });
       }
-    };
+    }
 
-    // Load on page ready
+    // Event listeners
+    nextBtn.addEventListener("click", () => {
+      const totalPages = Math.ceil(paginatedFiltered.length / ARTICLES_PER_PAGE);
+      if (page < totalPages - 1) {
+        page++;
+        renderPage();
+        window.scrollTo({ top: grid.offsetTop, behavior: 'smooth' });
+      }
+    });
+
+    backBtn.addEventListener("click", () => {
+      if (page > 0) {
+        page--;
+        renderPage();
+        window.scrollTo({ top: grid.offsetTop, behavior: 'smooth' });
+      }
+    });
+
+    searchToggleBtn.addEventListener('click', () => {
+      overlay.style.display = 'block';
+      overlaySearchInput.focus();
+      showOverlayArticles('');
+    });
+
+    overlayCloseBtn.addEventListener('click', () => {
+      overlay.style.display = 'none';
+    });
+
+    overlaySearchInput.addEventListener('input', (e) => {
+      showOverlayArticles(e.target.value);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === "Escape" && overlay.style.display === "block") {
+        overlay.style.display = 'none';
+      }
+    });
+
+    // Load articles on page load
     window.addEventListener('load', loadArticles);
   </script>
 </body>

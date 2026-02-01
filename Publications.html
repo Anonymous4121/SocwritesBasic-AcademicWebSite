@@ -49,7 +49,7 @@
 
     <!-- Articles Grid -->
     <section class="publications-grid" id="publications-grid">
-      <div class="loading">Loading articles from Strapi...</div>
+      <div class="loading">Loading articles...</div>
     </section>
 
     <!-- Pagination Controls -->
@@ -152,7 +152,7 @@
     // Load all articles from Strapi
     async function loadArticles() {
       try {
-        grid.innerHTML = '<div class="loading">🔄 Fetching articles from Strapi...</div>';
+        grid.innerHTML = '<div class="loading">🔄 Fetching articles...</div>';
         
         const response = await fetch(`${API_BASE}/api/articles?populate=*`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -163,7 +163,7 @@
         console.log('📚 Loaded', allArticles.length, 'articles');
         
         if (allArticles.length === 0) {
-          grid.innerHTML = '<div class="loading">No articles found in Strapi.</div>';
+          grid.innerHTML = '<div class="loading">No articles found in backend.</div>';
           return;
         }
 
@@ -172,11 +172,11 @@
         renderPage();
         
       } catch (error) {
-        console.error('Strapi error:', error);
+        console.error('Backend error:', error);
         grid.innerHTML = `
           <div class="error-msg">
             ❌ Failed to load articles: ${error.message}<br>
-            <small>Check Strapi permissions: Public → Articles → find</small>
+            <small>Check Backend permissions: Public → Articles → find</small>
           </div>
         `;
       }

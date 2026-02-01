@@ -13,7 +13,7 @@
       <!-- Left Scroll -->
       <div class="scroll left-scroll">
         <div class="scroll-paper">
-          <p> Welcome, dear reader! We're glad you're here to learn and explore. All the best—hope you enjoy your time!</p>
+          <p>Loading welcome message...</p> <!-- Dynamic from Strapi -->
         </div>
       </div>
 
@@ -34,7 +34,7 @@
       <!-- Right Scroll -->
       <div class="scroll right-scroll">
         <div class="scroll-paper">
-          <p> Every page you read and every note you write brings you closer to knowledge, growth, and discovery.</p>
+          <p>Loading inspirational quote...</p> <!-- Dynamic from Strapi -->
         </div>
       </div>
     </div>
@@ -43,7 +43,7 @@
   <main class="container">
     <section class="featured-article" id="featured-article">
       <h2>📘 Featured Research</h2>
-      <!-- JS will inject featured article here -->
+      <!-- JS will inject featured articles here -->
     </section>
 
     <section class="article-list" id="recent-articles">
@@ -108,14 +108,22 @@
           return;
         }
 
-        // Sort by PublishDate (newest first)
-        articles.sort((a, b) => new Date(b.attributes?.PublishDate || b.PublishDate) - new Date(a.attributes?.PublishDate || a.PublishDate));
+        // Filter featured (isFeatured: true) - limit 3
+        const featuredArticles = articles.filter(article => 
+          (article.attributes?.isFeatured || article.isFeatured) === true
+        ).slice(0, 3);
+
+        // Rest as recent (newest first)
+        const recentArticles = articles
+          .filter(article => 
+            (article.attributes?.isFeatured || article.isFeatured) !== true
+          )
+          .sort((a, b) => new Date(b.attributes?.PublishDate || b.PublishDate) - new Date(a.attributes?.PublishDate || a.PublishDate));
 
         // Helper to extract text from Rich Text (JournalContent)
         const extractRichText = (richTextArray) => {
           if (!richTextArray || !Array.isArray(richTextArray)) return "No content available.";
           
-          // Handle both Strapi v4 (direct array) and v5 (attributes nested)
           const content = richTextArray.children?.length ? richTextArray.children : richTextArray;
           
           return content
@@ -128,7 +136,6 @@
         const getImageUrl = (article) => {
           let imgData = null;
           
-          // Strapi v4/v5 compatible
           if (article.ArticleImage?.data?.attributes?.url) {
             imgData = article.ArticleImage.data.attributes;
           } else if (article.attributes?.ArticleImage?.data?.attributes?.url) {
@@ -136,36 +143,39 @@
           }
           
           if (imgData?.url) {
-            // Ensure full Strapi URL
             return API_BASE + imgData.url;
           }
-          return "./images/logo/DefaultImage.svg"; // FIXED LOCAL FALLBACK
+          return "./images/logo/DefaultImage.svg";
         };
 
-        // FEATURED ARTICLE (first one)
-        const feat = articles[0];
-        const featAttrs = feat.attributes || feat; // Handle both formats
-        const img = getImageUrl(feat);
+        // FEATURED ARTICLES (up to 3)
+        if (featuredArticles.length > 0) {
+          featuredArticles.forEach((feat) => {
+            const featAttrs = feat.attributes || feat;
+            const img = getImageUrl(feat);
+            featuredSection.innerHTML += `
+              <article>
+                <img src="${img}" 
+                     style="width:100%;max-height:240px;object-fit:cover;border-radius:10px;margin-bottom:10px;"
+                     onerror="this.src='./images/logo/DefaultImage.svg';"
+                     alt="Featured article image">
+                <h3>${featAttrs.Title || featAttrs.title || 'Untitled'}</h3>
+                <p class="meta">By ${featAttrs.Author || featAttrs.author || 'Unknown Author'} | ${featAttrs.PublishDate || featAttrs.publishDate || 'No date'}</p>
+                <p>${extractRichText(featAttrs.JournalContent || featAttrs.content)}</p>
+                <a class="read-more" href="./articlesPage.html?id=${feat.id}">Read more →</a>
+              </article>
+            `;
+          });
+        } else {
+          featuredSection.innerHTML += "<p>No featured articles set. Mark some with 'isFeatured' in Strapi.</p>";
+        }
 
-        featuredSection.innerHTML += `
-          <article>
-            <img src="${img}" 
-                 style="width:100%;max-height:240px;object-fit:cover;border-radius:10px;margin-bottom:10px;"
-                 onerror="this.src='./images/logo/DefaultImage.svg';"
-                 alt="Featured article image">
-            <h3>${featAttrs.Title || featAttrs.title || 'Untitled'}</h3>
-            <p class="meta">By ${featAttrs.Author || featAttrs.author || 'Unknown Author'} | ${featAttrs.PublishDate || featAttrs.publishDate || 'No date'}</p>
-            <p>${extractRichText(featAttrs.JournalContent || featAttrs.content)}</p>
-            <a class="read-more" href="./articlesPage.html?id=${feat.id}">Read more →</a>
-          </article>
-        `;
-
-        // RECENT ARTICLES (next 3)
-        const recent = articles.slice(1, 4);
-        if (recent.length === 0) {
+        // RECENT ARTICLES (next 3 non-featured)
+        const displayRecent = recentArticles.slice(0, 3);
+        if (displayRecent.length === 0) {
           recentSection.innerHTML += "<p>No recent articles available.</p>";
         } else {
-          recent.forEach((item) => {
+          displayRecent.forEach((item) => {
             const itemAttrs = item.attributes || item;
             recentSection.innerHTML += `
               <article>
@@ -182,8 +192,43 @@
       }
     }
 
-    // Load articles when page loads
-    loadArticles();
+    async function loadScrolls() {
+      try {
+        // Load WelcomeScroll (Left)
+        const welcomeRes = await fetch(`${API_BASE}/api/home-page-scrolls?populate=*&filters[ScrollName][$eq]=WelcomeScroll`);
+        const welcomeJson = await welcomeRes.json();
+        const welcomeData = welcomeJson.data && welcomeJson.data[0];
+        if (welcomeData) {
+          const leftScroll = document.querySelector('.left-scroll .scroll-paper p');
+          if (leftScroll) {
+            leftScroll.textContent = welcomeData.attributes?.ScrollText || welcomeData.ScrollText || 'Welcome message from Strapi!';
+          }
+        }
+      } catch (err) {
+        console.error("Error loading WelcomeScroll:", err);
+      }
+
+      try {
+        // Load QuoteScroll (Right)
+        const quoteRes = await fetch(`${API_BASE}/api/home-page-scrolls?populate=*&filters[ScrollName][$eq]=QuoteScroll`);
+        const quoteJson = await quoteRes.json();
+        const quoteData = quoteJson.data && quoteJson.data[0];
+        if (quoteData) {
+          const rightScroll = document.querySelector('.right-scroll .scroll-paper p');
+          if (rightScroll) {
+            rightScroll.textContent = quoteData.attributes?.ScrollText || quoteData.ScrollText || 'Quote from Strapi!';
+          }
+        }
+      } catch (err) {
+        console.error("Error loading QuoteScroll:", err);
+      }
+    }
+
+    // Load everything when page loads
+    window.addEventListener('load', () => {
+      loadScrolls();
+      loadArticles();
+    });
   </script>
 </body>
 </html>

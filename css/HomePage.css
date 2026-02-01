@@ -388,3 +388,16 @@ article img, .logo, .social-icons img {
   max-width: 100%;
   height: auto;
 }
+/* Featured articles spacing */
+.featured-article article {
+  margin-bottom: 2rem;  /* Gap between featured articles */
+  padding: 1.5rem;
+  background: rgba(248, 244, 238, 0.8);  /* Subtle pearl bg */
+  border-radius: 12px;
+  border-left: 6px solid var(--gold);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.featured-article article:last-child {
+  margin-bottom: 0;  /* No gap after last */
+}

@@ -103,12 +103,11 @@
   const noResultsMsg = document.getElementById('no-results-msg');
   const ARTICLES_PER_PAGE = 12;
   let allArticles = [];
-  let page = 0;
   let totalPages = 0;
-  let currentStrapiPage = 1;
+  let currentStrapiPage = 1;  // Current Strapi page (1-indexed)
   let isLoading = false;
 
-  // CLIENT-SIDE CACHING (Point 2)
+  // CLIENT-SIDE CACHING
   const articleCache = new Map();
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
@@ -169,18 +168,16 @@
     return "./images/logo/DefaultImage.svg";
   }
 
-  // OPTIMIZED STRAPI FETCH WITH PAGINATION (Point 1 & 3)
-  async function fetchArticlesFromStrapi(pageNum = 1) {
+  // OPTIMIZED STRAPI FETCH
+  async function fetchArticlesFromStrapi(pageNum) {
     const cacheKey = `articles-page-${pageNum}`;
     const cached = articleCache.get(cacheKey);
     
-    // Check cache first
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
       return cached.data;
     }
 
     try {
-      // ✅ OPTIMIZED: Specific populate + pagination from Strapi
       const response = await fetch(
         `${API_BASE}/api/articles?populate=ArticleImage&pagination[page]=${pageNum}&pagination[pageSize]=${ARTICLES_PER_PAGE}`
       );
@@ -188,10 +185,11 @@
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const json = await response.json();
       
-      // Cache the response
       articleCache.set(cacheKey, {
-        data: json.data || [],
-        total: json.meta?.pagination?.pageCount || 0,
+        data: {
+          articles: json.data || [],
+          totalPages: json.meta?.pagination?.pageCount || 0
+        },
         timestamp: Date.now()
       });
       
@@ -205,33 +203,32 @@
     }
   }
 
-  // Load articles (with caching + skeleton)
-  async function loadArticles() {
+  // FIXED: Single source of truth for loading
+  async function loadCurrentPage() {
     if (isLoading) return;
     isLoading = true;
     
     showSkeleton();
     
     try {
-      const { articles, totalPages: strapiTotal } = await fetchArticlesFromStrapi(1);
+      const { articles, totalPages: strapiTotal } = await fetchArticlesFromStrapi(currentStrapiPage);
       allArticles = articles;
       totalPages = strapiTotal;
       
-      console.log('📚 Loaded', allArticles.length, 'articles (Total pages:', totalPages, ')');
+      console.log(`📚 Page ${currentStrapiPage}:`, articles.length, 'articles (Total pages:', totalPages, ')');
       
-      if (allArticles.length === 0) {
-        grid.innerHTML = '<div class="loading">No articles found in Strapi.</div>';
+      if (articles.length === 0) {
+        grid.innerHTML = '<div class="loading">No articles found.</div>';
         return;
       }
       
-      renderPage();
+      renderArticles();
       
     } catch (error) {
-      console.error('Strapi error:', error);
+      console.error('Load error:', error);
       grid.innerHTML = `
         <div class="error-msg">
-          ❌ Failed to load articles: ${error.message}<br>
-          <small>Check Strapi permissions: Public → Articles → find</small>
+          ❌ Failed to load page ${currentStrapiPage}: ${error.message}
         </div>
       `;
     } finally {
@@ -239,20 +236,10 @@
     }
   }
 
-  function renderPage() {
+  function renderArticles() {
     grid.innerHTML = '';
     
-    // For current page, slice from allArticles (first page) or fetch new page
-    let pageArticles = [];
-    if (page === 0) {
-      pageArticles = allArticles;
-    } else {
-      // Load next page from Strapi
-      loadPageFromStrapi(page + 1);
-      return;
-    }
-
-    if (pageArticles.length === 0) {
+    if (allArticles.length === 0) {
       noResultsMsg.style.display = 'block';
       nextBtn.style.display = 'none';
       backBtn.style.display = 'none';
@@ -261,12 +248,13 @@
 
     noResultsMsg.style.display = 'none';
     
-    pageArticles.forEach(article => {
+    allArticles.forEach(article => {
       grid.appendChild(createArticleCard(article));
     });
 
-    backBtn.style.visibility = page > 0 ? 'visible' : 'hidden';
-    nextBtn.disabled = page >= totalPages - 1;
+    // Update button states
+    backBtn.style.visibility = currentStrapiPage > 1 ? 'visible' : 'hidden';
+    nextBtn.disabled = currentStrapiPage >= totalPages;
     
     if (totalPages <= 1) {
       nextBtn.style.display = 'none';
@@ -276,35 +264,6 @@
       backBtn.style.display = 'inline-block';
     }
   }
-
-  // Load specific Strapi page
-  async function loadPageFromStrapi(pageNum) {
-    showSkeleton();
-    try {
-      const { articles, totalPages: strapiTotal } = await fetchArticlesFromStrapi(pageNum);
-      allArticles = articles;
-      totalPages = strapiTotal;
-      renderPage();
-      window.scrollTo({ top: grid.offsetTop, behavior: 'smooth' });
-    } catch (error) {
-      console.error('Page load error:', error);
-    }
-  }
-
-  // Event listeners
-  nextBtn.addEventListener("click", () => {
-    if (page < totalPages - 1) {
-      page++;
-      loadPageFromStrapi(page + 1);
-    }
-  });
-
-  backBtn.addEventListener("click", () => {
-    if (page > 0) {
-      page--;
-      loadPageFromStrapi(page + 1);
-    }
-  });
 
   // Search functionality (UNCHANGED)
   const searchToggleBtn = document.getElementById("search-toggle");
@@ -337,6 +296,23 @@
     }
   }
 
+  // FIXED EVENT LISTENERS
+  nextBtn.addEventListener("click", async () => {
+    if (currentStrapiPage < totalPages && !isLoading) {
+      currentStrapiPage++;
+      await loadCurrentPage();
+      window.scrollTo({ top: grid.offsetTop - 100, behavior: 'smooth' });
+    }
+  });
+
+  backBtn.addEventListener("click", async () => {
+    if (currentStrapiPage > 1 && !isLoading) {
+      currentStrapiPage--;
+      await loadCurrentPage();
+      window.scrollTo({ top: grid.offsetTop - 100, behavior: 'smooth' });
+    }
+  });
+
   searchToggleBtn.addEventListener('click', () => {
     overlay.style.display = 'block';
     overlaySearchInput.focus();
@@ -357,7 +333,11 @@
     }
   });
 
-  window.addEventListener('load', loadArticles);
+  // Initial load
+  window.addEventListener('load', () => {
+    currentStrapiPage = 1;
+    loadCurrentPage();
+  });
 </script>
 </body>
 </html>

@@ -96,198 +96,216 @@
   </footer>
 
   <script>
-    const API_BASE = "https://glowing-star-d89f1652ea.strapiapp.com";
-    const grid = document.getElementById('publications-grid');
-    const nextBtn = document.getElementById('next-page-btn');
-    const backBtn = document.getElementById('back-page-btn');
-    const noResultsMsg = document.getElementById('no-results-msg');
-    const ARTICLES_PER_PAGE = 12;
-    let allArticles = [];
-    let page = 0;
-    let paginatedFiltered = [];
+  const API_BASE = "https://glowing-star-d89f1652ea.strapiapp.com";
+  const grid = document.getElementById('publications-grid');
+  const nextBtn = document.getElementById('next-page-btn');
+  const backBtn = document.getElementById('back-page-btn');
+  const noResultsMsg = document.getElementById('no-results-msg');
+  const ARTICLES_PER_PAGE = 12;
+  let allArticles = [];
+  let page = 0;
+  let paginatedFiltered = [];
 
-    // Navigation helper - uses article.id (matches articlesPage.html)
-    function goToArticle(articleId) {
-      window.location.href = `./articlesPage.html?id=${articleId}`;
+  // Navigation helper
+  function goToArticle(articleId) {
+    window.location.href = `./articlesPage.html?id=${articleId}`;
+  }
+
+  // Create skeleton card
+  function createSkeletonCard() {
+    const card = document.createElement('article');
+    card.className = 'pub-card skeleton';
+    card.style.minHeight = '320px'; // Fixed height to prevent jump
+    card.innerHTML = `
+      <div style="height: 150px; width: 100%; border-radius: 6px; margin-bottom: 0.75rem;"></div>
+      <div style="height: 20px; width: 80%; margin: 0 auto 0.4rem; border-radius: 4px;"></div>
+      <div style="height: 16px; width: 60%; margin: 0 auto; border-radius: 4px;"></div>
+    `;
+    return card;
+  }
+
+  // Show skeleton loading (12 cards)
+  function showSkeleton() {
+    grid.innerHTML = '';
+    for (let i = 0; i < ARTICLES_PER_PAGE; i++) {
+      grid.appendChild(createSkeletonCard());
     }
+  }
 
-    // Create article card from Strapi data
-    function createArticleCard(article, index) {
-      const attrs = article.attributes || article;
-      const id = article.id;
-      const title = attrs.Title || attrs.title || 'Untitled';
-      const author = attrs.Author || attrs.author || 'Unknown';
-      const publishDate = attrs.PublishDate || 'No date';
-      const imgUrl = getImageUrl(article);
+  // Create article card from Strapi data
+  function createArticleCard(article) {
+    const attrs = article.attributes || article;
+    const id = article.id;
+    const title = attrs.Title || attrs.title || 'Untitled';
+    const author = attrs.Author || attrs.author || 'Unknown';
+    const publishDate = attrs.PublishDate || 'No date';
+    const imgUrl = getImageUrl(article);
 
-      const card = document.createElement('article');
-      card.className = 'pub-card';
-      card.setAttribute('data-id', id);
-      card.style.cursor = 'pointer';
-      
-      card.innerHTML = `
-        <img src="${imgUrl}" alt="${title}" onerror="this.src='./images/logo/DefaultImage.svg'" />
-        <h3>${title}</h3>
-        <p class="meta">By ${author} | ${publishDate}</p>
-      `;
+    const card = document.createElement('article');
+    card.className = 'pub-card';
+    card.setAttribute('data-id', id);
+    card.style.cursor = 'pointer';
+    
+    card.innerHTML = `
+      <img src="${imgUrl}" alt="${title}" onerror="this.src='./images/logo/DefaultImage.svg'" loading="lazy" />
+      <h3>${title}</h3>
+      <p class="meta">By ${author} | ${publishDate}</p>
+    `;
 
-      // Make clickable
-      card.addEventListener('click', () => goToArticle(id));
-      return card;
-    }
+    card.addEventListener('click', () => goToArticle(id));
+    return card;
+  }
 
-    // Get Strapi image URL
-    function getImageUrl(article) {
-      try {
-        if (article.ArticleImage?.data?.attributes?.url) {
-          return API_BASE + article.ArticleImage.data.attributes.url;
-        }
-        if (article.attributes?.ArticleImage?.data?.attributes?.url) {
-          return API_BASE + article.attributes.ArticleImage.data.attributes.url;
-        }
-      } catch (e) {}
-      return "./images/logo/DefaultImage.svg";
-    }
-
-    // Load all articles from Strapi
-    async function loadArticles() {
-      try {
-        grid.innerHTML = '<div class="loading">🔄 Fetching articles from Strapi...</div>';
-        
-        const response = await fetch(`${API_BASE}/api/articles?populate=*`);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        
-        const json = await response.json();
-        allArticles = json.data || [];
-        
-        console.log('📚 Loaded', allArticles.length, 'articles');
-        
-        if (allArticles.length === 0) {
-          grid.innerHTML = '<div class="loading">No articles found in Strapi.</div>';
-          return;
-        }
-
-        // Render initial page
-        paginatedFiltered = allArticles;
-        renderPage();
-        
-      } catch (error) {
-        console.error('Strapi error:', error);
-        grid.innerHTML = `
-          <div class="error-msg">
-            ❌ Failed to load articles: ${error.message}<br>
-            <small>Check Strapi permissions: Public → Articles → find</small>
-          </div>
-        `;
+  // Get Strapi image URL (optimized)
+  function getImageUrl(article) {
+    try {
+      const imgPath = article.ArticleImage?.data?.attributes?.url || 
+                      article.attributes?.ArticleImage?.data?.attributes?.url;
+      if (imgPath) {
+        // Ensure absolute URL
+        return imgPath.startsWith('http') ? imgPath : API_BASE + imgPath;
       }
-    }
+    } catch (e) {}
+    return "./images/logo/DefaultImage.svg";
+  }
 
-    // Pagination
-    function renderPage() {
-      grid.innerHTML = '';
+  // Load articles from Strapi (with skeleton)
+  async function loadArticles() {
+    showSkeleton(); // Show skeletons immediately
+    
+    try {
+      const response = await fetch(`${API_BASE}/api/articles?populate=ArticleImage`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       
-      const start = page * ARTICLES_PER_PAGE;
-      const end = start + ARTICLES_PER_PAGE;
-      const pageArticles = paginatedFiltered.slice(start, end);
-
-      if (pageArticles.length === 0) {
-        noResultsMsg.style.display = 'block';
-        nextBtn.style.display = 'none';
-        backBtn.style.display = 'none';
+      const json = await response.json();
+      allArticles = json.data || [];
+      
+      console.log('📚 Loaded', allArticles.length, 'articles');
+      
+      if (allArticles.length === 0) {
+        grid.innerHTML = '<div class="loading">No articles found in Strapi.</div>';
         return;
       }
 
-      noResultsMsg.style.display = 'none';
+      paginatedFiltered = allArticles;
+      renderPage();
       
-      pageArticles.forEach(article => {
+    } catch (error) {
+      console.error('Strapi error:', error);
+      grid.innerHTML = `
+        <div class="error-msg">
+          ❌ Failed to load articles: ${error.message}<br>
+          <small>Check Strapi permissions: Public → Articles → find</small>
+        </div>
+      `;
+    }
+  }
+
+  // Pagination (optimized)
+  function renderPage() {
+    grid.innerHTML = '';
+    
+    const start = page * ARTICLES_PER_PAGE;
+    const end = start + ARTICLES_PER_PAGE;
+    const pageArticles = paginatedFiltered.slice(start, end);
+
+    if (pageArticles.length === 0) {
+      noResultsMsg.style.display = 'block';
+      nextBtn.style.display = 'none';
+      backBtn.style.display = 'none';
+      return;
+    }
+
+    noResultsMsg.style.display = 'none';
+    
+    pageArticles.forEach(article => {
+      grid.appendChild(createArticleCard(article));
+    });
+
+    const totalPages = Math.ceil(paginatedFiltered.length / ARTICLES_PER_PAGE);
+    backBtn.style.visibility = page > 0 ? 'visible' : 'hidden';
+    nextBtn.disabled = page >= totalPages - 1;
+    
+    if (totalPages <= 1) {
+      nextBtn.style.display = 'none';
+      backBtn.style.display = 'none';
+    } else {
+      nextBtn.style.display = 'inline-block';
+      backBtn.style.display = 'inline-block';
+    }
+  }
+
+  // Search functionality (UNCHANGED - as requested)
+  const searchToggleBtn = document.getElementById("search-toggle");
+  const overlay = document.getElementById('search-overlay');
+  const overlayCloseBtn = document.getElementById('close-search-overlay');
+  const overlaySearchInput = document.getElementById('overlay-search-bar');
+  const overlayArticlesGrid = document.getElementById('overlay-articles-grid');
+  const overlayNoResults = document.getElementById('overlay-no-results');
+
+  function showOverlayArticles(query) {
+    overlayArticlesGrid.innerHTML = '';
+    
+    const filtered = allArticles.filter(article => {
+      const attrs = article.attributes || article;
+      const title = (attrs.Title || attrs.title || '').toLowerCase();
+      const author = (attrs.Author || attrs.author || '').toLowerCase();
+      return title.includes(query.toLowerCase()) || author.includes(query.toLowerCase());
+    });
+
+    if (filtered.length === 0) {
+      overlayArticlesGrid.style.display = "none";
+      overlayNoResults.style.display = "block";
+    } else {
+      overlayArticlesGrid.style.display = "grid";
+      overlayNoResults.style.display = "none";
+      filtered.forEach(article => {
         const card = createArticleCard(article);
-        grid.appendChild(card);
+        overlayArticlesGrid.appendChild(card);
       });
-
-      const totalPages = Math.ceil(paginatedFiltered.length / ARTICLES_PER_PAGE);
-      backBtn.style.visibility = page > 0 ? 'visible' : 'hidden';
-      nextBtn.disabled = page >= totalPages - 1;
-      
-      if (totalPages <= 1) {
-        nextBtn.style.display = 'none';
-        backBtn.style.display = 'none';
-      } else {
-        nextBtn.style.display = 'inline-block';
-        backBtn.style.display = 'inline-block';
-      }
     }
+  }
 
-    // Search functionality
-    const searchToggleBtn = document.getElementById("search-toggle");
-    const overlay = document.getElementById('search-overlay');
-    const overlayCloseBtn = document.getElementById('close-search-overlay');
-    const overlaySearchInput = document.getElementById('overlay-search-bar');
-    const overlayArticlesGrid = document.getElementById('overlay-articles-grid');
-    const overlayNoResults = document.getElementById('overlay-no-results');
-
-    function showOverlayArticles(query) {
-      overlayArticlesGrid.innerHTML = '';
-      
-      const filtered = allArticles.filter(article => {
-        const attrs = article.attributes || article;
-        const title = (attrs.Title || attrs.title || '').toLowerCase();
-        const author = (attrs.Author || attrs.author || '').toLowerCase();
-        return title.includes(query.toLowerCase()) || author.includes(query.toLowerCase());
-      });
-
-      if (filtered.length === 0) {
-        overlayArticlesGrid.style.display = "none";
-        overlayNoResults.style.display = "block";
-      } else {
-        overlayArticlesGrid.style.display = "grid";
-        overlayNoResults.style.display = "none";
-        filtered.forEach(article => {
-          const card = createArticleCard(article);
-          overlayArticlesGrid.appendChild(card);
-        });
-      }
+  // Event listeners (UNCHANGED except loadArticles call)
+  nextBtn.addEventListener("click", () => {
+    const totalPages = Math.ceil(paginatedFiltered.length / ARTICLES_PER_PAGE);
+    if (page < totalPages - 1) {
+      page++;
+      renderPage();
+      window.scrollTo({ top: grid.offsetTop, behavior: 'smooth' });
     }
+  });
 
-    // Event listeners
-    nextBtn.addEventListener("click", () => {
-      const totalPages = Math.ceil(paginatedFiltered.length / ARTICLES_PER_PAGE);
-      if (page < totalPages - 1) {
-        page++;
-        renderPage();
-        window.scrollTo({ top: grid.offsetTop, behavior: 'smooth' });
-      }
-    });
+  backBtn.addEventListener("click", () => {
+    if (page > 0) {
+      page--;
+      renderPage();
+      window.scrollTo({ top: grid.offsetTop, behavior: 'smooth' });
+    }
+  });
 
-    backBtn.addEventListener("click", () => {
-      if (page > 0) {
-        page--;
-        renderPage();
-        window.scrollTo({ top: grid.offsetTop, behavior: 'smooth' });
-      }
-    });
+  searchToggleBtn.addEventListener('click', () => {
+    overlay.style.display = 'block';
+    overlaySearchInput.focus();
+    showOverlayArticles('');
+  });
 
-    searchToggleBtn.addEventListener('click', () => {
-      overlay.style.display = 'block';
-      overlaySearchInput.focus();
-      showOverlayArticles('');
-    });
+  overlayCloseBtn.addEventListener('click', () => {
+    overlay.style.display = 'none';
+  });
 
-    overlayCloseBtn.addEventListener('click', () => {
+  overlaySearchInput.addEventListener('input', (e) => {
+    showOverlayArticles(e.target.value);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === "Escape" && overlay.style.display === "block") {
       overlay.style.display = 'none';
-    });
+    }
+  });
 
-    overlaySearchInput.addEventListener('input', (e) => {
-      showOverlayArticles(e.target.value);
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === "Escape" && overlay.style.display === "block") {
-        overlay.style.display = 'none';
-      }
-    });
-
-    // Load articles on page load
-    window.addEventListener('load', loadArticles);
-  </script>
+  // Load articles on page load
+  window.addEventListener('load', loadArticles);
+</script>
 </body>
 </html>

@@ -102,9 +102,10 @@
   const backBtn = document.getElementById('back-page-btn');
   const noResultsMsg = document.getElementById('no-results-msg');
   const ARTICLES_PER_PAGE = 12;
-  let allArticles = [];
+  let allArticles = [];        // Current pagination page
+  let allStrapiArticles = [];  // ALL articles for search (new!)
   let totalPages = 0;
-  let currentStrapiPage = 1;  // Current Strapi page (1-indexed)
+  let currentStrapiPage = 1;
   let isLoading = false;
 
   // CLIENT-SIDE CACHING
@@ -168,7 +169,7 @@
     return "./images/logo/DefaultImage.svg";
   }
 
-  // OPTIMIZED STRAPI FETCH
+  // OPTIMIZED STRAPI FETCH (Pagination pages)
   async function fetchArticlesFromStrapi(pageNum) {
     const cacheKey = `articles-page-${pageNum}`;
     const cached = articleCache.get(cacheKey);
@@ -203,7 +204,37 @@
     }
   }
 
-  // FIXED: Single source of truth for loading
+  // NEW: Fetch ALL articles for search
+  async function fetchAllArticlesForSearch() {
+    const cacheKey = 'all-articles-search';
+    const cached = articleCache.get(cacheKey);
+    
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      return cached.data;
+    }
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/api/articles?populate=ArticleImage&pagination[pageSize]=1000`
+      );
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const json = await response.json();
+      
+      const allArticlesData = json.data || [];
+      articleCache.set(cacheKey, {
+        data: allArticlesData,
+        timestamp: Date.now()
+      });
+      
+      console.log('🔍 Cached ALL articles for search:', allArticlesData.length);
+      return allArticlesData;
+    } catch (error) {
+      console.error('Search fetch error:', error);
+      return [];
+    }
+  }
+
+  // Load current pagination page
   async function loadCurrentPage() {
     if (isLoading) return;
     isLoading = true;
@@ -215,7 +246,7 @@
       allArticles = articles;
       totalPages = strapiTotal;
       
-      console.log(`📚 Page ${currentStrapiPage}:`, articles.length, 'articles (Total pages:', totalPages, ')');
+      console.log(`📚 Page ${currentStrapiPage}:`, articles.length, 'articles');
       
       if (articles.length === 0) {
         grid.innerHTML = '<div class="loading">No articles found.</div>';
@@ -252,7 +283,6 @@
       grid.appendChild(createArticleCard(article));
     });
 
-    // Update button states
     backBtn.style.visibility = currentStrapiPage > 1 ? 'visible' : 'hidden';
     nextBtn.disabled = currentStrapiPage >= totalPages;
     
@@ -265,7 +295,7 @@
     }
   }
 
-  // Search functionality (UNCHANGED)
+  // UPDATED SEARCH: Scans ALL Strapi articles
   const searchToggleBtn = document.getElementById("search-toggle");
   const overlay = document.getElementById('search-overlay');
   const overlayCloseBtn = document.getElementById('close-search-overlay');
@@ -273,30 +303,57 @@
   const overlayArticlesGrid = document.getElementById('overlay-articles-grid');
   const overlayNoResults = document.getElementById('overlay-no-results');
 
-  function showOverlayArticles(query) {
+  function showSkeletonOverlay() {
+    overlayArticlesGrid.innerHTML = '';
+    for (let i = 0; i < 8; i++) {
+      overlayArticlesGrid.appendChild(createSkeletonCard());
+    }
+  }
+
+  async function showOverlayArticles(query) {
     overlayArticlesGrid.innerHTML = '';
     
-    const filtered = allArticles.filter(article => {
+    // Empty search = show current page
+    if (!query || query.trim() === '') {
+      allArticles.forEach(article => {
+        overlayArticlesGrid.appendChild(createArticleCard(article));
+      });
+      overlayNoResults.style.display = 'none';
+      overlayArticlesGrid.style.display = 'grid';
+      return;
+    }
+    
+    // Show skeleton while fetching all articles
+    showSkeletonOverlay();
+    
+    // Fetch ALL articles (cached after first search)
+    allStrapiArticles = await fetchAllArticlesForSearch();
+    
+    // Filter ALL articles
+    const filtered = allStrapiArticles.filter(article => {
       const attrs = article.attributes || article;
       const title = (attrs.Title || attrs.title || '').toLowerCase();
       const author = (attrs.Author || attrs.author || '').toLowerCase();
       return title.includes(query.toLowerCase()) || author.includes(query.toLowerCase());
     });
 
+    // Clear skeleton and show results
+    overlayArticlesGrid.innerHTML = '';
+    
     if (filtered.length === 0) {
-      overlayArticlesGrid.style.display = "none";
-      overlayNoResults.style.display = "block";
+      overlayArticlesGrid.style.display = 'none';
+      overlayNoResults.style.display = 'block';
     } else {
-      overlayArticlesGrid.style.display = "grid";
-      overlayNoResults.style.display = "none";
+      overlayArticlesGrid.style.display = 'grid';
+      overlayNoResults.style.display = 'none';
       filtered.forEach(article => {
-        const card = createArticleCard(article);
-        overlayArticlesGrid.appendChild(card);
+        overlayArticlesGrid.appendChild(createArticleCard(article));
       });
+      console.log(`🔍 Found ${filtered.length} articles for "${query}"`);
     }
   }
 
-  // FIXED EVENT LISTENERS
+  // Event listeners
   nextBtn.addEventListener("click", async () => {
     if (currentStrapiPage < totalPages && !isLoading) {
       currentStrapiPage++;
@@ -316,7 +373,7 @@
   searchToggleBtn.addEventListener('click', () => {
     overlay.style.display = 'block';
     overlaySearchInput.focus();
-    showOverlayArticles('');
+    showOverlayArticles(''); // Show current page initially
   });
 
   overlayCloseBtn.addEventListener('click', () => {

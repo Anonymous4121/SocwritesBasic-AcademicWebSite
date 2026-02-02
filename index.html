@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SocWrites oJournal</title>
+  <title>SocWrites Journal</title>
   <link rel="stylesheet" href="./css/HomePage.css" />
 </head>
 
@@ -42,13 +42,42 @@
 
   <main class="container">
     <section class="featured-article" id="featured-article">
-      <h2>📘 Featured Research</h2>
+      <h2> class="section-title featured-title">Featured Research
       <!-- JS will inject featured articles here -->
+      <svg class="logo-svg featured-logo" viewBox="0 0 48 48" width="28" height="28">
+          <defs>
+            <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#d4af37"/>
+              <stop offset="50%" stop-color="#e1c275"/>
+              <stop offset="100%" stop-color="#d4af37"/>
+            </linearGradient>
+          </defs>
+          <circle cx="24" cy="24" r="22" fill="none" stroke="url(#goldGrad)" stroke-width="3" stroke-linecap="round"/>
+          <polygon points="24,8 27,18 38,18 30,25 33,35 24,30 15,35 18,25 10,18 21,18" fill="url(#goldGrad)"/>
+          <circle cx="36" cy="12" r="4" fill="#bca97e" opacity="0.8"/>
+          <circle cx="37" cy="11" r="1.5" fill="white" opacity="0.6"/>
+        </svg>
+      </h2>
     </section>
 
     <section class="article-list" id="recent-articles">
-      <h2>📰 Recent Publications</h2>
-      <!-- JS will inject recent articles here -->
+      <h2 class="section-title recent-title">Recent Publications 
+        <!-- JS will inject recent articles here -->
+        <svg class="logo-svg recent-logo" viewBox="0 0 48 48" width="28" height="28">
+          <defs>
+            <linearGradient id="taupeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#bca97e"/>
+              <stop offset="70%" stop-color="#a89b6e"/>
+              <stop offset="100%" stop-color="#bca97e"/>
+            </linearGradient>
+          </defs>
+          <path d="M12,12 Q16,8 24,8 Q32,8 36,12 L36,36 Q32,40 24,40 Q16,40 12,36 Z" 
+                fill="url(#taupeGrad)" stroke="#f8f4ee" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M16,18 H32 M16,24 H32 M16,30 H28 M16,36 H24" stroke="#f8f4ee" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="38" cy="38" r="5" fill="#d4af37"/>
+          <circle cx="38" cy="38" r="2" fill="white" opacity="0.4"/>
+        </svg>
+      </h2>
     </section>
   </main>
 

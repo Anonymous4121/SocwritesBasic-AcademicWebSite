@@ -193,6 +193,45 @@ nav a {
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
   transition: color 0.3s ease;
 }
+/* ===== SOCWRITES LOGOS ===== */
+.logo-svg {
+  vertical-align: middle;
+  margin-left: 8px;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.15));
+  transition: transform 0.3s ease;
+}
+
+.logo-svg:hover {
+  transform: scale(1.1);
+}
+
+/* Section title alignment */
+.section-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.featured-title svg {
+  order: 2; /* Ensures logo stays right side */
+}
+
+.recent-title svg {
+  order: 2; /* Ensures logo stays right side */
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .logo-svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .section-title {
+    font-size: 1.4rem;
+  }
+}
 
 nav a:hover {
   color: var(--gold-hover);

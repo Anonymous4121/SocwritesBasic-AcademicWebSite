@@ -59,6 +59,30 @@
         </svg>
         Featured Research
       </h2>
+      <!-- 3 Featured Skeletons -->
+    <div class="skeletons-container" style="display: grid; gap: 2rem;">
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-image"></div>
+        <div class="skeleton skeleton-text"></div>
+        <div class="skeleton skeleton-text-short"></div>
+        <div class="skeleton skeleton-text"></div>
+        <div class="skeleton skeleton-button"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-image"></div>
+        <div class="skeleton skeleton-text"></div>
+        <div class="skeleton skeleton-text-short"></div>
+        <div class="skeleton skeleton-text"></div>
+        <div class="skeleton skeleton-button"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-image"></div>
+        <div class="skeleton skeleton-text"></div>
+        <div class="skeleton skeleton-text-short"></div>
+        <div class="skeleton skeleton-text"></div>
+        <div class="skeleton skeleton-button"></div>
+      </div>
+    </div>
       <!-- JS will inject content here -->
     </section>
 
@@ -126,7 +150,11 @@
 
     async function loadArticles() {
       try {
-        const res = await fetch(`${API_BASE}/api/articles?populate=*`);
+        // Show optimized loading
+        console.log('🚀 Fetching optimized articles...');
+        // optimized fetch with populate
+        //const res = await fetch(`${API_BASE}/api/articles?populate=*`); // old api  
+        const res = await fetch(`${API_BASE}/api/articles?populate=ArticleImage,JournalContent`);
         const json = await res.json();
         const articles = Array.isArray(json.data) ? json.data : [];
 
@@ -182,25 +210,24 @@
         };
 
         // FEATURED ARTICLES (up to 3)
+        const featuredContainer = featuredSection.querySelector('.skeletons-container');
         if (featuredArticles.length > 0) {
           featuredArticles.forEach((feat) => {
-            const featAttrs = feat.attributes || feat;
-            const img = getImageUrl(feat);
-            featuredSection.innerHTML += `
-              <article>
-                <img src="${img}" 
-                     style="width:100%;max-height:240px;object-fit:cover;border-radius:10px;margin-bottom:10px;"
-                     onerror="this.src='./images/logo/DefaultImage.svg';"
-                     alt="Featured article image">
-                <h3>${featAttrs.Title || featAttrs.title || 'Untitled'}</h3>
-                <p class="meta">By ${featAttrs.Author || featAttrs.author || 'Unknown Author'} | ${featAttrs.PublishDate || featAttrs.publishDate || 'No date'}</p>
-                <p>${extractRichText(featAttrs.JournalContent || featAttrs.content)}</p>
-                <a class="read-more" href="./articlesPage.html?id=${feat.id || feat.documentId}">Read more →</a>
-              </article>
-            `;
-          });
-        } else {
-          featuredSection.innerHTML += "<p>No featured articles set. Mark some with 'featuredArticle' in Strapi.</p>";
+          const featAttrs = feat.attributes || feat;
+          const img = getImageUrl(feat);
+          featuredContainer.innerHTML += `
+            <article>
+              <img src="${img}" style="width:100%;max-height:240px;object-fit:cover;border-radius:10px;margin-bottom:10px;"
+                 onerror="this.src='./images/logo/DefaultImage.svg';" alt="Featured article image">
+              <h3>${featAttrs.Title || featAttrs.title || 'Untitled'}</h3>
+              <p class="meta">By ${featAttrs.Author || featAttrs.author || 'Unknown Author'} | ${featAttrs.PublishDate || featAttrs.publishDate || 'No date'}</p>
+              <p>${extractRichText(featAttrs.JournalContent || featAttrs.content)}</p>
+              <a class="read-more" href="./articlesPage.html?id=${feat.id || feat.documentId}">Read more →</a>
+            </article>
+          `;
+         });
+          } else {
+          featuredContainer.innerHTML = '<p>No featured articles set. Mark some with \'featuredArticle\' in Strapi.</p>';
         }
 
         // RECENT ARTICLES (next 3 non-featured)
@@ -240,8 +267,6 @@
       console.error('Scrolls error:', err);
     }
   }
-
-  // Your existing loadArticles() stays the same...
 
   window.addEventListener('load', () => {
     loadScrolls();

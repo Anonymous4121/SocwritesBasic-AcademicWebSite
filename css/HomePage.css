@@ -91,6 +91,7 @@ header h1 {
 }
 
 /* Tagline Styling */
+
 .tagline {
   font-family: 'Merriweather', serif;
   font-size: 1.1rem;
@@ -99,8 +100,10 @@ header h1 {
   overflow: hidden;
   border-right: 2px solid var(--taupe);
   display: inline-block;
+  /* FIXED: Set container width to full text length */
+  max-width: 100%; /* Prevent parent clipping */
   width: 0;
-  animation: typing 2s steps(35, end) forwards, blink 0.7s step-end infinite;
+  animation: typing 2.5s steps(31, end) forwards, blink 0.7s step-end infinite;
 }
 
 @keyframes typing {
@@ -108,7 +111,7 @@ header h1 {
     width: 0;
   }
   to {
-    width: 13em; /* approximate length of full text, adjust if needed */
+    width: 15em; /* approximate length of full text, adjust if needed */
   }
 }
 
